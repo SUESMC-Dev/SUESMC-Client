@@ -119,6 +119,21 @@ const HelpSettingsPage = () => {
             />
           ),
         },
+        {
+          title: t("HelpSettingsPage.community.settings.SUESMC.title"),
+          children: (
+            <CommonIconButton
+              label={t("HelpSettingsPage.community.settings.SUESMC.url")}
+              icon="external"
+              withTooltip
+              tooltipPlacement="bottom-end"
+              size="xs"
+              onClick={() =>
+                openUrl(t("HelpSettingsPage.community.settings.SUESMC.url"))
+              }
+            />
+          ),
+        },
       ],
     },
   ];

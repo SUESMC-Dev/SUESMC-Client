@@ -12,8 +12,8 @@
         "reportIssue": {
           "title": "报告问题或请求功能"
         },
-        "aboutSJMC": {
-          "title": "关于上海交通大学 Minecraft 社（SJMC）"
+        "aboutSUESMC": {
+          "title": "关于上海工程技术大学 程园我的世界社（SUESMC）"
         }
       }
     },
@@ -39,6 +39,10 @@
         "skinview3d": {
           "title": "bs-community / skinview3d",
           "description": "皮肤预览组件基于此开源项目实现，遵循 MIT 协议使用"
+        },
+        "sjmcl": {
+          "title": "SJMC Launcher",
+          "description": "感谢 SJMC Launcher 团队对本项目的支持与帮助"
         }
       }
     },
@@ -146,7 +150,7 @@
         "title": "高级选项",
         "uuid": {
           "label": "UUID",
-          "placeholder": "（由 SJMCL 自动生成）",
+          "placeholder": "（由 SUESMCC 自动生成）",
           "errorMessage": "UUID 格式不正确"
         }
       }
@@ -175,7 +179,7 @@
       "description": {
         "start": {
           "3rdparty": "此认证源支持 Yggdrasil Connect 规范提案",
-          "microsoft": "SJMCL 支持微软 OAuth 2.0 设备权限授予流"
+          "microsoft": "SUESMCC 支持微软 OAuth 2.0 设备权限授予流"
         },
         "next": "请点击继续登录按钮跳转登录页面，输入以上代码（已自动复制）"
       },
@@ -284,14 +288,8 @@
         }
       },
       "presetBgList": {
-        "Jokull": {
-          "name": "银淞雪镇"
-        },
-        "SJTU-eastgate": {
-          "name": "SJTU 紫气东来门"
-        },
-        "GNLXC": {
-          "name": "GNWork 理想城"
+        "SUES-Library": {
+          "name": "第一图文中心"
         }
       }
     },
@@ -918,14 +916,14 @@
         "directories": {
           "special": {
             "CURRENT_DIR": "当前文件夹",
-            "APP_DATA_SUBDIR": "SJMCL 数据文件夹",
+            "APP_DATA_SUBDIR": "SUESMCC 数据文件夹",
             "OFFICIAL_DIR": "官方启动器文件夹"
           }
         }
       },
       "deleteDialog": {
         "title": "删除游戏目录",
-        "content": "确定要删除游戏目录 {{dirName}} 吗？（SJMCL 将不会扫描此目录，但不会删除硬盘上的文件）"
+        "content": "确定要删除游戏目录 {{dirName}} 吗？（SUESMCC 将不会扫描此目录，但不会删除硬盘上的文件）"
       },
       "directoryNotExist": "该目录不存在，请删除并重新添加"
     },
@@ -1045,6 +1043,10 @@
         "SJMC": {
           "title": "上海交通大学 Minecraft 社（SJMC）",
           "url": "https://mc.sjtu.cn"
+        },
+        "SUESMC":{
+          "title": "上海工程技术大学 程园我的世界社（SUESMC）",
+          "url": "https://www.suesmc.ltd"
         }
       }
     },
@@ -1253,7 +1255,7 @@
     },
     "confirmDelete": {
       "title": "移除 Java",
-      "description": "确认要移除此版本 Java 吗？（SJMCL 将无法使用此 Java 启动游戏，但不会删除硬盘上的文件）"
+      "description": "确认要移除此版本 Java 吗？（ 将无法使用此 Java 启动游戏，但不会删除硬盘上的文件）"
     }
   },
   "LaunchPage": {
@@ -2324,7 +2326,7 @@
     "header": {
       "title": "在 GitHub 为我们点亮星标"
     },
-    "body": "如果您喜爱 SJMCL，并希望支持我们，可以在 GitHub 为我们点一颗星吗？这个小小的动作对我们来说意义重大，能激励我们为您持续提供特性体验。",
+    "body": "如果您喜爱 SUESMCC，并希望支持我们，可以在 GitHub 为我们点一颗星吗？这个小小的动作对我们来说意义重大，能激励我们为您持续提供特性体验。",
     "button": {
       "later": "稍后",
       "starUs": "点亮星标"
@@ -2393,12 +2395,12 @@
       "title": "欢迎！"
     },
     "body": {
-      "part1": "欢迎使用 SJMCL！在开始使用之前，请务必阅读并同意我们的",
+      "part1": "欢迎使用 SUESMCC！本启动器脱胎于 SJMC Launcher，在开始使用之前，请务必阅读并同意我们的",
       "terms": "用户协议",
       "periods": "。"
     },
     "warning": {
-      "unstableVersion": "您正在使用{{versionLabel}}的 SJMCL，部分功能可能不稳定或未开发完成，欢迎报告使用问题与功能建议。"
+      "unstableVersion": "您正在使用{{versionLabel}}的 SUESMCC，部分功能可能不稳定或未开发完成，欢迎报告使用问题与功能建议。"
     },
     "button": {
       "exit": "退出",

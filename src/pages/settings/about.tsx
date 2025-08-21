@@ -63,17 +63,17 @@ const AboutSettingsPage = () => {
           ),
         },
         {
-          title: t("AboutSettingsPage.about.settings.aboutSJMC.title"),
+          title: t("AboutSettingsPage.about.settings.aboutSUESMC.title"),
           children: (
             <CommonIconButton
-              label="https://mc.sjtu.cn/welcome/content/3/"
+              label="https://www.suesmc.ltd/content/5/"
               icon="external"
               withTooltip
               tooltipPlacement="bottom-end"
               size="xs"
               h={18}
               onClick={() => {
-                openUrl("https://mc.sjtu.cn/welcome/content/3/");
+                openUrl("https://www.suesmc.ltd/content/5/");
               }}
             />
           ),
@@ -83,6 +83,22 @@ const AboutSettingsPage = () => {
     {
       title: t("AboutSettingsPage.ack.title"),
       items: [
+        {
+          title: t("AboutSettingsPage.ack.settings.sjmcl.title"),
+          description: t("AboutSettingsPage.ack.settings.sjmcl.description"),
+          children: (
+            <CommonIconButton
+              label="https://github.com/UNIkeEN/SJMCL"
+              icon="external"
+              withTooltip
+              tooltipPlacement="bottom-end"
+              size="xs"
+              onClick={() => {
+                openUrl("https://github.com/UNIkeEN/SJMCL");
+              }}
+            />
+          ),
+        },
         {
           title: t("AboutSettingsPage.ack.settings.skinview3d.title"),
           description: t(

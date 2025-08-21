@@ -136,7 +136,7 @@ const AppearanceSettingsPage = () => {
 
           let newSelectedBgKey;
           if (customBgList.length === 1) {
-            newSelectedBgKey = "%built-in:Jokull";
+            newSelectedBgKey = "%built-in:SUES-Library";
             if (appearanceConfigs.background.randomCustom)
               update("appearance.background.randomCustom", false);
           } else {
@@ -342,7 +342,7 @@ const AppearanceSettingsPage = () => {
   };
 
   const PresetBackgroundList = () => {
-    const presetBgList = ["Jokull", "SJTU-eastgate", "GNLXC"];
+    const presetBgList = ["SUES-Library"];
 
     return (
       <Wrap spacing={3.5} justify="right">
