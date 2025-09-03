@@ -901,10 +901,14 @@ pub async fn create_instance(
   let subdirs = get_instance_subdir_paths(
     &app,
     &instance,
-    &[&InstanceSubdirType::Libraries, &InstanceSubdirType::Assets],
+    &[
+      &InstanceSubdirType::Libraries,
+      &InstanceSubdirType::Assets,
+      &InstanceSubdirType::Mods,
+    ],
   )
   .ok_or(InstanceError::InstanceNotFoundByID)?;
-  let [libraries_dir, assets_dir] = subdirs.as_slice() else {
+  let [libraries_dir, assets_dir, mods_dir] = subdirs.as_slice() else {
     return Err(InstanceError::InstanceNotFoundByID.into());
   };
 
@@ -928,6 +932,7 @@ pub async fn create_instance(
       &instance.version,
       &instance.mod_loader,
       libraries_dir.to_path_buf(),
+      mods_dir.to_path_buf(),
       &mut version_info,
       &mut task_params,
     )
@@ -980,7 +985,7 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
 
   match instance.mod_loader.status {
     // prevent duplicated installation
-    ModLoaderStatus::NotDownloaded => {
+    ModLoaderStatus::DownloadFailed => {
       return Err(InstanceError::ProcessorExecutionFailed.into());
     }
     ModLoaderStatus::Installing => {
@@ -991,6 +996,15 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
     }
     _ => {}
   }
+
+  {
+    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+    let mut state = binding.lock()?;
+    let instance = state
+      .get_mut(&instance_id)
+      .ok_or(InstanceError::InstanceNotFoundByID)?;
+    instance.mod_loader.status = ModLoaderStatus::Installing;
+  };
 
   let client_info_dir = instance
     .version_path
