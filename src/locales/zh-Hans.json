@@ -42,7 +42,7 @@
         },
         "sjmcl": {
           "title": "SJMC Launcher",
-          "description": "感谢 SJMC Launcher 团队对本项目的支持与帮助"
+          "description": "本启动器基于 SJMC Launcher 构建，感谢 SJMCL 开发团队"
         }
       }
     },
