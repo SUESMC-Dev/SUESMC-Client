@@ -1337,6 +1337,10 @@
       "viewSkin": "View Skin",
       "delete": "Delete",
       "copyUUID": "Copy UUID"
+    },
+    "toast": {
+      "refreshing": "Refreshing player info",
+      "deleting": "Deleting player"
     }
   },
   "PingTestPage": {
@@ -1744,14 +1748,6 @@
           "description": {
             "GAME_DIR_ALREADY_ADDED": "The directory has already been added",
             "GAME_DIR_NOT_EXIST": "The directory does not exist"
-          }
-        }
-      },
-      "checkServiceAvailability": {
-        "error": {
-          "title": "Service Unavailable",
-          "description": {
-            "FETCH_ERROR": "Failed to fetch the meta server"
           }
         }
       },
