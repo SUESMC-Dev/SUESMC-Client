@@ -180,22 +180,22 @@
     "oauthCommon": {
       "description": {
         "start": {
-          "3rdparty": "此认证源支持 Yggdrasil Connect 规范提案",
-          "microsoft": "SJMCL 支持微软 OAuth 2.0 设备权限授予流"
+          "3rdparty": "授权 SUESMC 客户端获取角色信息",
+          "microsoft": "授权 SUESMC 客户端获取角色信息"
         },
-        "next": "请点击继续登录按钮跳转登录页面，输入以上代码（已自动复制）"
+        "next": "点击“继续登录”后在登录页面输入以上代码（已自动复制）"
       },
       "button": {
         "start": {
-          "3rdparty": "开始 OAuth 登录",
-          "microsoft": "开始微软登录"
+          "3rdparty": "开始登录",
+          "microsoft": "开始登录"
         },
         "next": "继续登录"
       }
     },
     "button": {
       "buyMinecraft": "购买 Minecraft",
-      "useOAuthLogin": "OAuth 登录",
+      "useOAuthLogin": "授权登录",
       "usePasswordLogin": "账号密码登录"
     }
   },

@@ -180,15 +180,15 @@
     "oauthCommon": {
       "description": {
         "start": {
-          "3rdparty": "This auth source supports the Yggdrasil Connect Proposal",
-          "microsoft": "Supports Microsoft OAuth 2.0 device authorization grant flow"
+          "3rdparty": "Authorize SUESMC Client to fetch player profile",
+          "microsoft": "Authorize SUESMC Client to fetch player profile"
         },
-        "next": "Please click the Continue button and input the code above (already copied)"
+        "next": "Click \"Continue\" and input the code above (already copied)"
       },
       "button": {
         "start": {
-          "3rdparty": "Start OAuth Login",
-          "microsoft": "Start Microsoft OAuth"
+          "3rdparty": "Start Login",
+          "microsoft": "Start Login"
         },
         "next": "Continue"
       }
