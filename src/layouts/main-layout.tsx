@@ -52,7 +52,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         let newCount = config.runCount + 1;
         if (newCount === 10) {
           setTimeout(() => {
-            onStarUsModalOpen();
+            // dont show star repo modal until found a proper statement
+            // onStarUsModalOpen();
           }, 300);
         }
         update("runCount", newCount);
