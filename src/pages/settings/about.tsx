@@ -28,6 +28,23 @@ const AboutSettingsPage = () => {
           children: `${basicInfo.launcherVersion}${basicInfo.isPortable ? " (Portable)" : ""}`,
         },
         {
+          title: t("AboutSettingsPage.about.settings.SJMCL.title"),
+          description: t("AboutSettingsPage.about.settings.SJMCL.description"),
+          children: (
+            <CommonIconButton
+              label="https://github.com/UNIkeEN/SJMCL"
+              icon="external"
+              withTooltip
+              tooltipPlacement="bottom-end"
+              size="xs"
+              h={18}
+              onClick={() => {
+                openUrl("https://github.com/UNIkeEN/SJMCL");
+              }}
+            />
+          ),
+        },
+        {
           title: t("AboutSettingsPage.about.settings.contributors.title"),
           children: (
             <HStack spacing={2.5}>
@@ -48,6 +65,9 @@ const AboutSettingsPage = () => {
         },
         {
           title: t("AboutSettingsPage.about.settings.reportIssue.title"),
+          description: t(
+            "AboutSettingsPage.about.settings.reportIssue.description"
+          ),
           children: (
             <CommonIconButton
               label="https://github.com/UNIkeEN/SJMCL/issues"
@@ -63,17 +83,17 @@ const AboutSettingsPage = () => {
           ),
         },
         {
-          title: t("AboutSettingsPage.about.settings.aboutSUESMC.title"),
+          title: t("AboutSettingsPage.about.settings.aboutSJMC.title"),
           children: (
             <CommonIconButton
-              label="https://www.suesmc.ltd/content/5/"
+              label="https://mc.sjtu.cn/welcome/content/3/"
               icon="external"
               withTooltip
               tooltipPlacement="bottom-end"
               size="xs"
               h={18}
               onClick={() => {
-                openUrl("https://www.suesmc.ltd/content/5/");
+                openUrl("https://mc.sjtu.cn/welcome/content/3/");
               }}
             />
           ),
@@ -83,22 +103,6 @@ const AboutSettingsPage = () => {
     {
       title: t("AboutSettingsPage.ack.title"),
       items: [
-        {
-          title: t("AboutSettingsPage.ack.settings.sjmcl.title"),
-          description: t("AboutSettingsPage.ack.settings.sjmcl.description"),
-          children: (
-            <CommonIconButton
-              label="https://github.com/UNIkeEN/SJMCL"
-              icon="external"
-              withTooltip
-              tooltipPlacement="bottom-end"
-              size="xs"
-              onClick={() => {
-                openUrl("https://github.com/UNIkeEN/SJMCL");
-              }}
-            />
-          ),
-        },
         {
           title: t("AboutSettingsPage.ack.settings.skinview3d.title"),
           description: t(
@@ -197,6 +201,9 @@ const AboutSettingsPage = () => {
         },
         {
           title: t("AboutSettingsPage.legalInfo.settings.userAgreement.title"),
+          description: t(
+            "AboutSettingsPage.legalInfo.settings.userAgreement.description"
+          ),
           children: (
             <CommonIconButton
               label={t(
