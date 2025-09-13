@@ -6,11 +6,16 @@
         "version": {
           "title": "版本"
         },
+        "SJMCL": {
+          "title": "改编自 SJMC Launcher",
+          "description": "来自上海交通大学 Minecraft 社（SJMC）的 Minecraft 启动器"
+        },
         "contributors": {
-          "title": "开发者名单"
+          "title": "SJMC Launcher 的开发者名单"
         },
         "reportIssue": {
-          "title": "报告问题或请求功能"
+          "title": "向 SJMC Launcher 报告问题或请求功能",
+          "description": "如果你的问题或请求也适用于 SJMC Launcher"
         },
         "aboutSJMC": {
           "title": "关于上海交通大学 Minecraft 社（SJMC）"
@@ -47,10 +52,11 @@
       "settings": {
         "copyright": {
           "title": "版权",
-          "description": "版权所有 © 2024-2025 SJMCL 开发团队."
+          "description": "版权所有 © 2024-2025 SJMCL 开发团队. 经 SUESMC-dev 按协议修改并分发."
         },
         "userAgreement": {
           "title": "用户协议",
+          "description": "使用本修改版本需要遵守 SJMC Launcher 用户协议",
           "url": "https://mc.sjtu.cn/sjmcl/zh/docs/tos"
         },
         "openSourceLicense": {

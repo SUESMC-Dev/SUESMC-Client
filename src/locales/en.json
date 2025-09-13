@@ -6,11 +6,16 @@
         "version": {
           "title": "Version"
         },
+        "SJMCL": {
+          "title": "Adapted from SJMC Launcher",
+          "description": "A Minecraft launcher from SJTU Minecraft Club (SJMC)"
+        },
         "contributors": {
-          "title": "Contributors"
+          "title": "Contributors of SJMC Launcher"
         },
         "reportIssue": {
-          "title": "Report an Issue or Submit a Feature Request"
+          "title": "Report an Issue or Submit a Feature Request to SJMC Launcher",
+          "description": "If your issue or request is also applicable to SJMC Launcher"
         },
         "aboutSJMC": {
           "title": "About SJTU Minecraft Club (SJMC)"
@@ -47,10 +52,11 @@
       "settings": {
         "copyright": {
           "title": "Copyright",
-          "description": "Copyright © 2024-2025 SJMCL Team."
+          "description": "Copyright © 2024-2025 SJMCL Team. Modified and redistributed by SUESMC-dev under license."
         },
         "userAgreement": {
           "title": "User Agreement",
+          "description": "You must obey SJMC Launcher User Agreement to use this modified version",
           "url": "https://mc.sjtu.cn/sjmcl/en/docs/tos"
         },
         "openSourceLicense": {
