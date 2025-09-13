@@ -88,6 +88,21 @@ const HelpSettingsPage = () => {
       title: t("HelpSettingsPage.community.title"),
       items: [
         {
+          title: t("HelpSettingsPage.community.settings.SUESMC.title"),
+          children: (
+            <CommonIconButton
+              label={t("HelpSettingsPage.community.settings.SUESMC.url")}
+              icon="external"
+              withTooltip
+              tooltipPlacement="bottom-end"
+              size="xs"
+              onClick={() =>
+                openUrl(t("HelpSettingsPage.community.settings.SUESMC.url"))
+              }
+            />
+          ),
+        },
+        {
           title: t("HelpSettingsPage.community.settings.MUA.title"),
           description: t("HelpSettingsPage.community.settings.MUA.description"),
           children: (
@@ -115,21 +130,6 @@ const HelpSettingsPage = () => {
               h={18}
               onClick={() =>
                 openUrl(t("HelpSettingsPage.community.settings.SJMC.url"))
-              }
-            />
-          ),
-        },
-        {
-          title: t("HelpSettingsPage.community.settings.SUESMC.title"),
-          children: (
-            <CommonIconButton
-              label={t("HelpSettingsPage.community.settings.SUESMC.url")}
-              icon="external"
-              withTooltip
-              tooltipPlacement="bottom-end"
-              size="xs"
-              onClick={() =>
-                openUrl(t("HelpSettingsPage.community.settings.SUESMC.url"))
               }
             />
           ),

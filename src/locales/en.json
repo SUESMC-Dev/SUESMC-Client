@@ -1047,6 +1047,10 @@
     "community": {
       "title": "University Player Community",
       "settings": {
+        "SUESMC":{
+          "title": "Shanghai University of Engineering Science Minecraft Club (SUESMC)",
+          "url": "https://www.suesmc.ltd"
+        },
         "MUA": {
           "title": "Minecraft University Alliance (MUA)",
           "description": "Play with university players across China",
