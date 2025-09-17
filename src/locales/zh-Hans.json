@@ -1057,7 +1057,7 @@
     "community": {
       "title": "高校玩家社区",
       "settings": {
-        "SUESMC":{
+        "SUESMC": {
           "title": "上海工程技术大学程园我的世界社（SUESMC）",
           "url": "https://www.suesmc.ltd"
         },
@@ -2436,6 +2436,22 @@
   "WorldLevelDataModal": {
     "header": {
       "title": "世界基础数据 - {{worldName}}"
+    }
+  },
+  "LogoTitle": {
+    "heading": {
+      "short": {
+        "text1": "SUESMC",
+        "text2": "",
+        "space": "",
+        "query": ""
+      },
+      "full": {
+        "text1": "SUESMC",
+        "text2": "客户端",
+        "space": " ",
+        "query": "客户端"
+      }
     }
   }
 }

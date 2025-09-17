@@ -2437,5 +2437,21 @@
     "header": {
       "title": "World Level Data - {{worldName}}"
     }
+  },
+  "LogoTitle": {
+    "heading": {
+      "short": {
+        "text1": "SUESMC",
+        "text2": "",
+        "space": "",
+        "query": ""
+      },
+      "full": {
+        "text1": "SUESMC",
+        "text2": "Client",
+        "space": " ",
+        "query": "Client"
+      }
+    }
   }
 }
