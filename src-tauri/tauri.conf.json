@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "SJMCL",
+  "productName": "SUESMC-Client",
   "version": "0.3.2",
-  "identifier": "SJMCL",
+  "identifier": "ltd.suesmc.client",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -79,9 +79,11 @@
           "width": 640,
           "height": 440
         }
-      }
+      },
+      "bundleName": "SUESMC Client"
     },
     "resources": [
+      "assets/infoplist/**/*",
       "assets/skins/*",
       "assets/game/*",
       "assets/icons/icon.ico",

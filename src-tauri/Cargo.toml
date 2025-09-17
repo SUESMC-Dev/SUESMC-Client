@@ -1,8 +1,8 @@
 [package]
-name = "SJMCL"
+name = "SUESMC-Client"
 version = "0.3.2"
-description = "A Minecraft launcher from SJMC"
-authors = ["SJMCL Team"]
+description = "A Minecraft launcher from SJMC, modified by SUESMC-dev"
+authors = ["SJMCL Team", "SUESMC-dev"]
 license = "GNU General Public License v3.0 (with additional terms)"
 repository = "https://github.com/UNIkeEN/SJMCL"
 edition = "2021"
