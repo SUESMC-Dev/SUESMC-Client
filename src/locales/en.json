@@ -882,6 +882,12 @@
     "revealFile": "Reveal in {{opener}}",
     "search": "Search",
     "skip": "Skip",
+    "share": {
+      "text": "Share",
+      "toast": {
+        "error": "Failed to share"
+      }
+    },
     "version": {
       "dev": "development version",
       "nightly": "nightly build",
@@ -922,6 +928,10 @@
         },
         "resourceTranslation": {
           "title": "Resource Translation",
+          "description": "%only available in zh-Hans"
+        },
+        "skipFirstScreenOptions": {
+          "title": "Skip First Launch Screen Options",
           "description": "%only available in zh-Hans"
         }
       }

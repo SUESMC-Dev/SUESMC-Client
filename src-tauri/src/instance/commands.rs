@@ -8,7 +8,7 @@ use super::{
       get_instance_game_config, get_instance_subdir_path_by_id, refresh_and_update_instances,
       unify_instance_name,
     },
-    mods::common::{get_mod_info_from_dir, get_mod_info_from_jar},
+    mods::common::{add_local_mod_translations, get_mod_info_from_dir, get_mod_info_from_jar},
     resourcepack::{load_resourcepack_from_dir, load_resourcepack_from_zip},
     server::{load_servers_info_from_path, query_server_status},
     world::{level_data_to_world_info, load_level_data_from_path},
@@ -34,6 +34,7 @@ use crate::{
       modpack::{
         curseforge::CurseForgeManifest, misc::ModpackMetaInfo, modrinth::ModrinthManifest,
       },
+      options_txt::get_zh_hans_lang_tag,
     },
     models::misc::{ModLoader, ModLoaderStatus},
   },
@@ -488,16 +489,44 @@ pub async fn retrieve_local_mod_list(
   }
 
   // check potential incompatibility
-  let binding = app.state::<Mutex<HashMap<String, Instance>>>();
-  let state = binding.lock().unwrap();
-  let instance = state
-    .get(&instance_id)
-    .ok_or(InstanceError::InstanceNotFoundByID)?;
+  let incompatible_loader_type = {
+    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+    let state = binding.lock().unwrap();
+    let instance = state
+      .get(&instance_id)
+      .ok_or(InstanceError::InstanceNotFoundByID)?;
+
+    if instance.mod_loader.loader_type != ModLoaderType::Unknown {
+      Some(instance.mod_loader.loader_type.clone())
+    } else {
+      None
+    }
+  };
 
   mod_infos.iter_mut().for_each(|mod_info| {
-    mod_info.potential_incompatibility = instance.mod_loader.loader_type != ModLoaderType::Unknown
-      && mod_info.loader_type != instance.mod_loader.loader_type;
+    if let Some(loader_type) = &incompatible_loader_type {
+      mod_info.potential_incompatibility = mod_info.loader_type != *loader_type;
+    } else {
+      mod_info.potential_incompatibility = false;
+    }
   });
+
+  // Add translations for mod names and descriptions concurrently
+  let mut translation_tasks = Vec::new();
+  for mut mod_info in mod_infos {
+    let app = app.clone();
+    let task = tokio::spawn(async move {
+      let _ = add_local_mod_translations(&app, &mut mod_info).await;
+      mod_info
+    });
+    translation_tasks.push(task);
+  }
+  let mut mod_infos = Vec::new();
+  for task in translation_tasks {
+    if let Ok(mod_info) = task.await {
+      mod_infos.push(mod_info);
+    }
+  }
 
   // sort by name (and version)
   mod_infos.sort();
@@ -962,8 +991,32 @@ pub async fn create_instance(
   )
   .await?;
 
-  save_json_async(&version_info, &version_path.join(format!("{}.json", name))).await?;
+  // Optionally skip first-screen options by adding options.txt (available for zh-Hans only)
+  let (language, skip_first_screen_options) = {
+    let launcher_config = launcher_config_state.lock()?;
+    (
+      launcher_config.general.general.language.clone(),
+      launcher_config
+        .general
+        .functionality
+        .skip_first_screen_options,
+    )
+  };
+  if language == "zh-Hans" && skip_first_screen_options {
+    if let Some(lang_code) = get_zh_hans_lang_tag(&instance.version, &app).await {
+      let options_path = get_instance_subdir_paths(&app, &instance, &[&InstanceSubdirType::Root])
+        .ok_or(InstanceError::InstanceNotFoundByID)?[0]
+        .join("options.txt");
+      if !options_path.exists() {
+        fs::write(options_path, format!("lang:{}\n", lang_code))
+          .map_err(|_| InstanceError::FileCreationFailed)?;
+      }
+    }
+  }
 
+  // Save the edited client json
+  save_json_async(&version_info, &version_path.join(format!("{}.json", name))).await?;
+  // Save the SJMCL instance config json
   instance
     .save_json_cfg()
     .await
