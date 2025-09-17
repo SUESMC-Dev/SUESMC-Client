@@ -192,7 +192,7 @@ structstruck::strike! {
         pub font_size: usize, // as percent
       },
       pub background: struct {
-        #[default = "%built-in:Jokull"]
+        #[default = "%built-in:SUES-Library"]
         pub choice: String,
         pub random_custom: bool,
       },

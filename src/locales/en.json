@@ -290,14 +290,8 @@
         }
       },
       "presetBgList": {
-        "Jokull": {
-          "name": "Jǫkull Village"
-        },
-        "SJTU-eastgate": {
-          "name": "SJTU Eastgate"
-        },
-        "GNLXC": {
-          "name": "GNWork City"
+        "SUES-Library": {
+          "name": "Library"
         }
       }
     },

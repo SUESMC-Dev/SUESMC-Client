@@ -228,7 +228,7 @@ export const defaultConfig: LauncherConfig = {
       fontSize: 100,
     },
     background: {
-      choice: "%built-in:Jokull",
+      choice: "%built-in:SUES-Library",
       randomCustom: false,
     },
     accessibility: {
