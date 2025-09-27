@@ -16,16 +16,16 @@ use tauri_plugin_http::reqwest;
 type SourceTuple = (&'static str, &'static str, fn(&str, &str) -> String);
 const SOURCES: [SourceTuple; 2] = [
   (
-    "https://mc.sjtu.cn/api-sjmcl/releases/latest",
+    "https://client.suesmc.ltd/api/releases/latest",
     "version",
-    |_, fname| format!("https://mc.sjtu.cn/sjmcl/releases/{}", fname),
+    |_, fname| format!("https://client.suesmc.ltd/releases/{}", fname),
   ),
   (
-    "https://api.github.com/repos/UNIkeEN/SJMCL/releases/latest",
+    "https://api.github.com/repos/SUESMC-dev/SUESMC-Client/releases/latest",
     "tag_name",
     |ver, fname| {
       format!(
-        "https://github.com/UNIkeEN/SJMCL/releases/download/v{}/{}",
+        "https://github.com/SUESMC-dev/SUESMC-Client/releases/download/v{}/{}",
         ver, fname
       )
     },
