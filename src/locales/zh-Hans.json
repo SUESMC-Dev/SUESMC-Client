@@ -452,7 +452,7 @@
       "type": "类型"
     },
     "warning": {
-      "mojang": "由 Mojang 分发的 Java 运行时将由 SJMCL 安装到特定目录",
+      "mojang": "由 Mojang 分发的 Java 运行时将由 SUESMC 客户端安装到特定目录",
       "oracle": "从 Oracle 源下载可能需要登录"
     }
   },
@@ -1419,8 +1419,8 @@
   },
   "RestartForUpdateConfirmDialog": {
     "title": "启动器更新",
-    "body": "新版本已完成下载，重新启动 SJMCL 以完成更新",
-    "bodyMSI": "新版本已完成下载，点击安装将关闭 SJMCL 并运行安装程序",
+    "body": "新版本已完成下载，重新启动 SUESMC 客户端以完成更新",
+    "bodyMSI": "新版本已完成下载，点击安装将关闭 SUESMC 客户端并运行安装程序",
     "button": {
       "restart": "重新启动",
       "install": "安装",

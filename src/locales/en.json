@@ -452,7 +452,7 @@
       "type": "Type"
     },
     "warning": {
-      "mojang": "Java runtime from Mojang will be installed by SJMCL into a specific directory.",
+      "mojang": "Java runtime from Mojang will be installed by SUESMC Client into a specific directory.",
       "oracle": "Downloading from Oracle may require login."
     }
   },
@@ -1419,8 +1419,8 @@
   },
   "RestartForUpdateConfirmDialog": {
     "title": "Launcher Update",
-    "body": "The new version has been downloaded. Restart SJMCL to complete the update.",
-    "bodyMSI": "The new version has been downloaded. Clicking Install will close SJMCL and run the installer.",
+    "body": "The new version has been downloaded. Restart SUESMC Client to complete the update.",
+    "bodyMSI": "The new version has been downloaded. Clicking Install will close SUESMC Client and run the installer.",
     "button": {
       "restart": "Restart",
       "install": "Install",
