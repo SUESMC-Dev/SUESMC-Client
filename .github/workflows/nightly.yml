@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       force_build:
-        description: 'Force build even if no changes (kept for compatibility)'
+        description: 'Force build even if no changes'
         required: false
         type: boolean
         default: false
@@ -37,7 +37,9 @@ jobs:
       - name: Check for changes and prepare nightly branch
         id: check-changes
         run: |
-          echo "Checking for changes between main and nightly..."
+          BRANCH="${{ github.ref_name }}"
+          if [ -z "$BRANCH" ]; then BRANCH=main; fi
+          echo "Checking for changes between $BRANCH and nightly..."
           
           # First, delete any existing nightly tag to avoid conflicts
           if git ls-remote --tags origin | grep -q "refs/tags/nightly$"; then
@@ -45,9 +47,9 @@ jobs:
             git push origin :refs/tags/nightly
           fi
           
-          # Get the latest commit hash from main
-          MAIN_COMMIT=$(git rev-parse origin/main)
-          echo "Latest main commit: $MAIN_COMMIT"
+          # Get the latest commit hash from selected branch
+          SELECTED_COMMIT=$(git rev-parse origin/$BRANCH)
+          echo "Latest $BRANCH commit: $SELECTED_COMMIT"
           
           # Check if nightly branch exists
           if git show-ref --verify --quiet refs/remotes/origin/nightly; then
@@ -55,8 +57,8 @@ jobs:
             NIGHTLY_COMMIT=$(git rev-parse origin/nightly)
             echo "Latest nightly commit: $NIGHTLY_COMMIT"
             
-            if [ "$MAIN_COMMIT" = "$NIGHTLY_COMMIT" ]; then
-              echo "No changes detected between main and nightly"
+            if [ "$SELECTED_COMMIT" = "$NIGHTLY_COMMIT" ]; then
+              echo "No changes detected between $BRANCH and nightly"
               if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
                 echo "Force build requested, proceeding anyway"
                 echo "should_build=true" >> $GITHUB_OUTPUT
@@ -73,9 +75,9 @@ jobs:
             echo "should_build=true" >> $GITHUB_OUTPUT
           fi
           
-          # Create or update nightly branch to match main
-          echo "Creating/updating nightly branch..."
-          git checkout -B nightly origin/main
+          # Create or update nightly branch to match selected branch
+          echo "Creating/updating nightly branch from $BRANCH..."
+          git checkout -B nightly origin/$BRANCH
           
           # Push the branch explicitly using full ref path
           echo "Pushing nightly branch..."
@@ -109,7 +111,10 @@ jobs:
         run: |
           # Get current date for nightly version
           NIGHTLY_DATE=$(date -u +"%Y%m%d")
-          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BRANCH="${{ github.ref_name }}"
+          if [ -z "$BRANCH" ]; then BRANCH=main; fi
+          # Use the selected branch's commit hash for versioning (not the bumped nightly commit)
+          COMMIT_HASH=$(git rev-parse --short origin/$BRANCH)
           
           # Get base version from package.json
           NIGHTLY_VERSION="${NIGHTLY_DATE}"
