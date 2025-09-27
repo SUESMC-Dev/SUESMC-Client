@@ -334,6 +334,9 @@ pub async fn check_launcher_update(app: AppHandle) -> SJMCLResult<VersionMetaInf
     config_state.basic_info.launcher_version.clone()
   };
 
+  // skip all updates before SUESMC-dev implements the updater api
+  return Ok(VersionMetaInfo::default());
+
   // skip non-semver versions
   if semver::Version::parse(&current_version).is_err() {
     return Ok(VersionMetaInfo::default());
