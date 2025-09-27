@@ -33,26 +33,6 @@ jobs:
             target: x86_64-pc-windows-msvc
             platform: windows
             arch: x86_64
-          - os: windows-latest
-            target: i686-pc-windows-msvc
-            platform: windows
-            arch: i686
-          - os: windows-11-arm
-            target: aarch64-pc-windows-msvc
-            platform: windows
-            arch: aarch64
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            platform: macos
-            arch: aarch64
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            platform: macos
-            arch: x86_64
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            platform: linux
-            arch: x86_64
 
     runs-on: ${{ matrix.os }}
     
@@ -117,19 +97,18 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
         run: |
-          ARTIFACT_NAME="SJMCL_${{ env.VERSION }}_${{ matrix.platform }}_${{ matrix.arch }}"
+          ARTIFACT_NAME="SUESMC-Client_${{ env.VERSION }}_${{ matrix.platform }}_${{ matrix.arch }}"
           echo "Artifact Name: $ARTIFACT_NAME"
           mkdir artifacts
           if [ "${{ matrix.platform }}" = "windows" ]; then
-            python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SJMCL.exe"
+            python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SUESMC-Client.exe"
             # For Windows, copy the portable exe
-            mv "src-tauri/target/${{ matrix.target }}/release/SJMCL-patched.exe" artifacts/"$ARTIFACT_NAME"_portable.exe
-            mv "src-tauri/target/${{ matrix.target }}/release/bundle/msi/"*.msi artifacts/"$ARTIFACT_NAME".msi
+            mv "src-tauri/target/${{ matrix.target }}/release/SUESMC-Client-patched.exe" artifacts/"$ARTIFACT_NAME"_portable.exe
             ls -la artifacts
           elif [ "${{ matrix.platform }}" = "macos" ]; then
             ls src-tauri/target/${{ matrix.target }}/release/bundle/macos
             # For MacOS, compress the .app folder
-            tar -cvzf artifacts/"$ARTIFACT_NAME".app.tar.gz -C "src-tauri/target/${{ matrix.target }}/release/bundle/macos" "SJMCL.app"
+            tar -cvzf artifacts/"$ARTIFACT_NAME".app.tar.gz -C "src-tauri/target/${{ matrix.target }}/release/bundle/macos" "SUESMC-Client.app"
             ls -la artifacts
           elif [ "${{ matrix.platform }}" = "linux" ]; then
             python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SJMCL"

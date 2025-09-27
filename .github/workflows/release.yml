@@ -5,10 +5,12 @@
 name: Release
 
 on:
-    push:
-        tags:
-            - 'v*'
     workflow_dispatch:
+      inputs:
+        version:
+          description: 'Version to release (e.g., 1.2.3). If empty, uses package.json or package.json+commit hash.'
+          required: false
+          type: string
 
 permissions:
   contents: write
@@ -39,20 +41,16 @@ jobs:
           PKG_VERSION=$(node -p "require('./package.json').version")
           echo "Package version: $PKG_VERSION"
           
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            TAG_VERSION="${{ github.ref_name }}"
-            TAG_VERSION=${TAG_VERSION#v}
-            
-            if [[ "$TAG_VERSION" != "$PKG_VERSION" ]]; then
-              echo "❌ Git tag version ($TAG_VERSION) does not match package version ($PKG_VERSION)"
-              exit 1
-            fi
-            echo "✅ Git tag version matches package version: $TAG_VERSION"
+          # For manual runs, allow optional input.version to override
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            PKG_VERSION="${{ github.event.inputs.version }}"
+            echo "Using manual input version: $PKG_VERSION"
           else
+            # For non-tag manual runs, append short commit hash to package.json version
             COMMIT_HASH=$(git rev-parse HEAD)
             COMMIT_HASH=${COMMIT_HASH:0:6}
             PKG_VERSION="$PKG_VERSION"-"$COMMIT_HASH"
-            echo "Not a tag, using package version with commit hash: $PKG_VERSION"
+            echo "No manual version provided, using package version with commit hash: $PKG_VERSION"
           fi
           
           # Set the version as output
@@ -67,21 +65,10 @@ jobs:
     secrets:
       SJMCL_CURSEFORGE_API_KEY: ${{ secrets.SJMCL_CURSEFORGE_API_KEY }}
 
-  Code-Sign-macOS:
-    needs: [Version-Check, Build-and-Release]
-    uses: ./.github/workflows/sign-macos.yml
-    with:
-      version: ${{ needs.Version-Check.outputs.version }}
-    secrets:
-      MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
-      MACOS_CERT_P12_PASSWORD: ${{ secrets.MACOS_CERT_P12_PASSWORD }}
-      MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
-      MACOS_NOTARY_APPLE_ID: ${{ secrets.MACOS_NOTARY_APPLE_ID }}
-      MACOS_NOTARY_PASSWORD: ${{ secrets.MACOS_NOTARY_PASSWORD }}
-      MACOS_NOTARY_TEAM_ID: ${{ secrets.MACOS_NOTARY_TEAM_ID }}
+  # macOS signing is disabled in this fork (Windows x64 portable only)
 
   Create-Release:
-    needs: [Version-Check, Build-and-Release, Code-Sign-macOS]
+    needs: [Version-Check, Build-and-Release]
     runs-on: ubuntu-latest
     
     steps:
@@ -89,19 +76,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download non-macOS artifacts
+      - name: Download Windows x64 artifact only
         uses: actions/download-artifact@v4
         with:
-          pattern: 'SJMCL_${{ needs.Version-Check.outputs.version }}_*'
+          name: SUESMC-Client_${{ needs.Version-Check.outputs.version }}_windows_x86_64
           path: artifacts
-          merge-multiple: true
-
-      - name: Download signed macOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: 'SJMCL_${{ needs.Version-Check.outputs.version }}_macos_*_signed'
-          path: artifacts-signed
-          merge-multiple: true
 
       - name: Organize release artifacts
         env:
@@ -109,29 +88,13 @@ jobs:
         run: |
           mkdir -p release-artifacts
           
-          # Copy non-macOS artifacts
-          find artifacts -name "SJMCL_${{ env.VERSION }}_windows_*" -exec cp {} release-artifacts/ \;
-          find artifacts -name "SJMCL_${{ env.VERSION }}_linux_*" -exec cp {} release-artifacts/ \;
-          
-          # Copy signed macOS artifacts (rename to remove _signed suffix)
-          find artifacts-signed -name "SJMCL_${{ env.VERSION }}_macos_*" -type f | while read file; do
-            basename=$(basename "$file")
-            # Remove _signed suffix before the file extension
-            newname=$(echo "$basename" | sed 's/_signed\./\./')
-            cp "$file" "release-artifacts/$newname"
-          done
+          # Copy only Windows x64 portable artifact
+          find artifacts -name "SUESMC-Client_${{ env.VERSION }}_windows_x86_64_portable.exe" -exec cp {} release-artifacts/ \;
           
           echo "Final release artifacts:"
           ls -la release-artifacts/
 
-      - name: Upload artifacts to remote server
-        env:
-          SJMC_SECRET_KEY: ${{ secrets.SJMC_DEPLOY_SECRET_KEY }}
-          SJMC_DEPLOY_API: ${{ secrets.SJMC_DEPLOY_API }}
-          SJMC_DEPLOY_PROJECT: ${{ secrets.SJMC_DEPLOY_PROJECT }}
-        run: |
-          bash scripts/release/upload_to_sjmc_server.sh
-        shell: bash
+      # Skip private remote server upload in fork
 
       - name: Generate Changelog
         id: changelog
@@ -145,11 +108,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.Version-Check.outputs.version }}
         run: |
-          RELEASE_TAG="${{ env.VERSION }}"
-          
-          # Create the release
-          gh release create "$GITHUB_REF_NAME" \
-            --title "SJMCL ${{ env.VERSION }}" \
+          RELEASE_TAG="v${{ env.VERSION }}"
+          TITLE="SUESMC-Client ${{ env.VERSION }} (Windows x64 portable)"
+
+          # Create the release with Windows x64 portable only
+          gh release create "$RELEASE_TAG" \
+            --title "$TITLE" \
             --draft \
             $PRERELEASE \
             --notes-file release-notes.md \

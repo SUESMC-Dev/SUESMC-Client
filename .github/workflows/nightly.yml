@@ -1,13 +1,10 @@
 name: Nightly Build
 
 on:
-  schedule:
-    # Run every Sunday at 00:00 UTC
-    - cron: '0 0 * * 0'
   workflow_dispatch:
     inputs:
       force_build:
-        description: 'Force build even if no changes'
+        description: 'Force build even if no changes (kept for compatibility)'
         required: false
         type: boolean
         default: false
@@ -155,22 +152,10 @@ jobs:
     secrets:
       SJMCL_CURSEFORGE_API_KEY: ${{ secrets.SJMCL_CURSEFORGE_API_KEY }}
 
-  Sign-macOS-Artifacts:
-    needs: [Check-and-Prepare, Build-Nightly]
-    if: needs.Check-and-Prepare.outputs.should_build == 'true'
-    uses: ./.github/workflows/sign-macos.yml
-    with:
-      version: "nightly_${{ needs.Check-and-Prepare.outputs.nightly_version }}"
-    secrets:
-      MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
-      MACOS_CERT_P12_PASSWORD: ${{ secrets.MACOS_CERT_P12_PASSWORD }}
-      MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
-      MACOS_NOTARY_APPLE_ID: ${{ secrets.MACOS_NOTARY_APPLE_ID }}
-      MACOS_NOTARY_PASSWORD: ${{ secrets.MACOS_NOTARY_PASSWORD }}
-      MACOS_NOTARY_TEAM_ID: ${{ secrets.MACOS_NOTARY_TEAM_ID }}
+  # macOS signing disabled for Windows-only nightly builds
 
   Create-Nightly-Release:
-    needs: [Check-and-Prepare, Build-Nightly, Sign-macOS-Artifacts]
+    needs: [Check-and-Prepare, Build-Nightly]
     if: needs.Check-and-Prepare.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     
@@ -179,21 +164,13 @@ jobs:
         with:
           ref: nightly
 
-      - name: Download all artifacts
+      - name: Download Windows x64 artifact only
         uses: actions/download-artifact@v4
         with:
+          name: SUESMC-Client_nightly_${{ needs.Check-and-Prepare.outputs.nightly_version }}_windows_x86_64
           path: artifacts
 
-      - name: Remove unsigned macOS artifacts to avoid conflicts
-        run: |
-          echo "Removing unsigned macOS artifacts to prevent filename conflicts..."
-          # Remove unsigned macOS artifacts since we have signed versions
-          rm -rf ./artifacts/SJMCL_*_macos_aarch64/
-          rm -rf ./artifacts/SJMCL_*_macos_x86_64/
-          echo "Unsigned macOS artifacts removed"
-          
-          echo "Remaining artifacts:"
-          ls -la ./artifacts/*/*
+      # No macOS artifacts in Windows-only nightly build
 
       - name: Delete existing nightly release if exists
         env:
@@ -230,7 +207,7 @@ jobs:
           EOF
           
           echo "Creating nightly pre-release..."
-          ls -la ./artifacts/*/*
+          ls -la ./artifacts/*
           
           # Create the pre-release with nightly tag
           gh release create "nightly" \
@@ -238,7 +215,7 @@ jobs:
             --notes-file release_notes.md \
             --prerelease \
             --target nightly \
-            ./artifacts/*/*
+            ./artifacts/*
           
           echo "Nightly release created successfully!"
 
