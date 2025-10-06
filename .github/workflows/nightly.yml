@@ -250,7 +250,7 @@ jobs:
           fi
           
           echo "Creating nightly pre-release..."
-          ls -la ./artifacts/*
+          ls -la ./artifacts/*/*
           
           # Create the pre-release with nightly tag
           gh release create "nightly" \
@@ -258,7 +258,7 @@ jobs:
             --notes-file release_notes.md \
             --prerelease \
             --target nightly \
-            ./artifacts/*
+            ./artifacts/*/*
           
           echo "Nightly release created successfully!"
 
