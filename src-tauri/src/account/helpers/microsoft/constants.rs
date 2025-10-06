@@ -1,4 +1,4 @@
-pub static CLIENT_ID: &str = "b2468fd2-7996-4f42-8857-5b65d834ef5c";
+pub static CLIENT_ID: &str = "094a4e5a-9d11-4331-9e63-576b2c1b8bd9";
 pub static SCOPE: &str = "XboxLive.signin offline_access";
 pub static DEVICE_AUTH_ENDPOINT: &str =
   "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";

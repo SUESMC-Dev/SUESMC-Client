@@ -65,6 +65,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'pnpm'
 
       # See https://github.com/tauri-apps/tauri-action
       - name: Install Rust stable
@@ -72,7 +73,6 @@ jobs:
         with:
           targets: ${{ matrix.target }}
           # targets: ${{ matrix.platform == 'macos' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
 
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
@@ -82,19 +82,24 @@ jobs:
           # Additional dependencies for RPM building
           sudo apt-get install -y rpm
 
+      - uses: actions/cache@v4
+        with:
+          # See here for caching with `yarn`, `bun` or other package managers https://github.com/actions/cache/blob/main/examples.md or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
       - name: Install frontend dependencies
         run: |
           npm install -g pnpm
           pnpm import
           pnpm install
 
-      - name: Remove Font files (MacOS)
-        if: matrix.platform == 'macos'
-        run: |
-          rm -r public/fonts/Sinter/
-          rm src/styles/fonts.css
-          touch src/styles/fonts.css
-      
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
@@ -117,26 +122,26 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
         run: |
-          ARTIFACT_NAME="SJMCL_${{ env.VERSION }}_${{ matrix.platform }}_${{ matrix.arch }}"
+          ARTIFACT_NAME="SUESMC-Client_${{ env.VERSION }}_${{ matrix.platform }}_${{ matrix.arch }}"
           echo "Artifact Name: $ARTIFACT_NAME"
           mkdir artifacts
           if [ "${{ matrix.platform }}" = "windows" ]; then
-            python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SJMCL.exe"
+            python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SUESMC-Client.exe"
             # For Windows, copy the portable exe
-            mv "src-tauri/target/${{ matrix.target }}/release/SJMCL-patched.exe" artifacts/"$ARTIFACT_NAME"_portable.exe
+            mv "src-tauri/target/${{ matrix.target }}/release/SUESMC-Client-patched.exe" artifacts/"$ARTIFACT_NAME"_portable.exe
             mv "src-tauri/target/${{ matrix.target }}/release/bundle/msi/"*.msi artifacts/"$ARTIFACT_NAME".msi
             ls -la artifacts
           elif [ "${{ matrix.platform }}" = "macos" ]; then
             ls src-tauri/target/${{ matrix.target }}/release/bundle/macos
             # For MacOS, compress the .app folder
-            tar -cvzf artifacts/"$ARTIFACT_NAME".app.tar.gz -C "src-tauri/target/${{ matrix.target }}/release/bundle/macos" "SJMCL.app"
+            tar -cvzf artifacts/"$ARTIFACT_NAME".app.tar.gz -C "src-tauri/target/${{ matrix.target }}/release/bundle/macos" "SUESMC-Client.app"
             ls -la artifacts
           elif [ "${{ matrix.platform }}" = "linux" ]; then
-            python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SJMCL"
+            python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SUESMC_Client"
             mv "src-tauri/target/${{ matrix.target }}/release/bundle/appimage/"*.AppImage artifacts/"$ARTIFACT_NAME".AppImage
             mv "src-tauri/target/${{ matrix.target }}/release/bundle/deb/"*.deb artifacts/"$ARTIFACT_NAME".deb
             mv "src-tauri/target/${{ matrix.target }}/release/bundle/rpm/"*.rpm artifacts/"$ARTIFACT_NAME".rpm
-            mv "src-tauri/target/${{ matrix.target }}/release/SJMCL-patched" artifacts/"$ARTIFACT_NAME"_portable
+            mv "src-tauri/target/${{ matrix.target }}/release/SUESMC-Client-patched" artifacts/"$ARTIFACT_NAME"_portable
             ls -la artifacts
           fi
           

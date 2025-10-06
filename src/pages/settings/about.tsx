@@ -74,6 +74,7 @@ const AboutSettingsPage = () => {
               </Text>
               {isValidSemanticVersion(basicInfo.launcherVersion) && (
                 <Button
+                  disabled={true}
                   variant="subtle"
                   colorScheme={newerVersion.version ? primaryColor : "gray"}
                   size="xs"
@@ -97,6 +98,23 @@ const AboutSettingsPage = () => {
           ),
         },
         {
+          title: t("AboutSettingsPage.about.settings.SJMCL.title"),
+          description: t("AboutSettingsPage.about.settings.SJMCL.description"),
+          children: (
+            <CommonIconButton
+              label={t("AboutSettingsPage.about.settings.SJMCL.url")}
+              icon="external"
+              withTooltip
+              tooltipPlacement="bottom-end"
+              size="xs"
+              h={18}
+              onClick={() => {
+                openUrl(t("AboutSettingsPage.about.settings.SJMCL.url"));
+              }}
+            />
+          ),
+        },
+        {
           title: t("AboutSettingsPage.about.settings.contributors.title"),
           children: (
             <HStack spacing={2.5}>
@@ -117,6 +135,9 @@ const AboutSettingsPage = () => {
         },
         {
           title: t("AboutSettingsPage.about.settings.reportIssue.title"),
+          description: t(
+            "AboutSettingsPage.about.settings.reportIssue.description"
+          ),
           children: (
             <CommonIconButton
               label="https://github.com/UNIkeEN/SJMCL/issues"
@@ -220,22 +241,6 @@ const AboutSettingsPage = () => {
             />
           ),
         },
-        {
-          title: t("AboutSettingsPage.ack.settings.sinter.title"),
-          description: t("AboutSettingsPage.ack.settings.sinter.description"),
-          children: (
-            <CommonIconButton
-              label="https://m.ui.cn/details/615564"
-              icon="external"
-              withTooltip
-              tooltipPlacement="bottom-end"
-              size="xs"
-              onClick={() => {
-                openUrl("https://m.ui.cn/details/615564");
-              }}
-            />
-          ),
-        },
       ],
     },
     {
@@ -250,6 +255,9 @@ const AboutSettingsPage = () => {
         },
         {
           title: t("AboutSettingsPage.legalInfo.settings.userAgreement.title"),
+          description: t(
+            "AboutSettingsPage.legalInfo.settings.userAgreement.description"
+          ),
           children: (
             <CommonIconButton
               label={t(

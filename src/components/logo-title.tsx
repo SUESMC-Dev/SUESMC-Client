@@ -1,23 +1,36 @@
 import { BoxProps, HStack, Heading, Highlight, Image } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import styles from "@/styles/logo-title.module.css";
 
 interface LogoTitleProps extends BoxProps {}
 
 export const TitleShort: React.FC<LogoTitleProps> = (props) => {
+  const { t } = useTranslation();
   return (
     <Heading size="md" className={styles.title} {...props}>
-      <Highlight query="L" styles={{ color: "blue.600", userSelect: "none" }}>
-        SJMCL
+      {t("LogoTitle.heading.short.text1")}
+      {t("LogoTitle.heading.short.space")}
+      <Highlight
+        query={t("LogoTitle.heading.short.query")}
+        styles={{ color: "blue.600", userSelect: "none" }}
+      >
+        {t("LogoTitle.heading.short.text2")}
       </Highlight>
     </Heading>
   );
 };
 
 export const TitleFull: React.FC<LogoTitleProps> = (props) => {
+  const { t } = useTranslation();
   return (
     <Heading size="md" className={styles.title} {...props}>
-      <Highlight query="L" styles={{ color: "blue.600", userSelect: "none" }}>
-        SJMC Launcher
+      {t("LogoTitle.heading.full.text1")}
+      {t("LogoTitle.heading.full.space")}
+      <Highlight
+        query={t("LogoTitle.heading.full.query")}
+        styles={{ color: "blue.600", userSelect: "none" }}
+      >
+        {t("LogoTitle.heading.full.text2")}
       </Highlight>
     </Heading>
   );
