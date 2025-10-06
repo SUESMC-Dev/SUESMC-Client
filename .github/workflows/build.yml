@@ -61,10 +61,16 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: pnpm
 
       # See https://github.com/tauri-apps/tauri-action
       - name: Install Rust stable
@@ -95,7 +101,6 @@ jobs:
 
       - name: Install frontend dependencies
         run: |
-          npm install -g pnpm
           pnpm import
           pnpm install
 
