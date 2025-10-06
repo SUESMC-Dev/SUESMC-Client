@@ -65,7 +65,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'pnpm'
 
       # See https://github.com/tauri-apps/tauri-action
       - name: Install Rust stable
