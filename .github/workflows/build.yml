@@ -71,6 +71,7 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
+          cache-dependency-path: 'package-lock.json'
 
       # See https://github.com/tauri-apps/tauri-action
       - name: Install Rust stable
