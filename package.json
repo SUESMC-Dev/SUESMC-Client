@@ -1,12 +1,12 @@
 {
   "name": "suesmc-client",
-  "version": "0.4.4-1",
+  "version": "0.5.0-1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint",
     "tauri": "tauri",
     "lint-staged": "lint-staged",
     "prepare": "husky",
