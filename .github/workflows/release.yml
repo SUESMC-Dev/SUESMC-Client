@@ -61,6 +61,7 @@ jobs:
     with:
       version: ${{ needs.Version-Check.outputs.version }}
       upload_artifacts: true
+      branch: ${{ github.ref }}
     secrets:
       SJMCL_CURSEFORGE_API_KEY: ${{ secrets.SJMCL_CURSEFORGE_API_KEY }}
 
