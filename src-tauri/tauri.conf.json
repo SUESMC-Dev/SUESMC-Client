@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "SJMCL",
+  "productName": "SUESMC-Client",
   "version": "0.5.1",
-  "identifier": "SJMCL",
+  "identifier": "ltd.suesmc.client",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -73,6 +73,7 @@
     "licenseFile": "../LICENSE",
     "license": "GPLv3",
     "macOS": {
+      "bundleName": "SUESMC Client",
       "dmg": {
         "background": "assets/misc/dmg_bg.png",
         "windowSize": {
@@ -82,6 +83,7 @@
       }
     },
     "resources": [
+      "assets/infoplist/**/*",
       "assets/skins/*",
       "assets/game/*",
       "assets/icons/icon.ico",
