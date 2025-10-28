@@ -316,7 +316,10 @@
   },
   "ChangeModLoaderModal": {
     "header": {
-      "title": "Change Mod Loader"
+      "title": {
+        "change": "Change Mod Loader",
+        "install": "Install Mod Loader"
+      }
     },
     "notSelectedLoader": "No new loader selected",
     "footer": {
@@ -519,8 +522,7 @@
       "settings": {
         "directory": {
           "title": "Download Cache Directory",
-          "select": "Change",
-          "open": "Open"
+          "select": "Change"
         },
         "clear": {
           "title": "Clear Download Cache",
@@ -952,8 +954,10 @@
       "settings": {
         "openConfigJson": {
           "title": "Launcher Settings File",
-          "description": "Reveal the raw launcher settings file in {{opener}}.",
-          "button": "Open"
+          "description": "Reveal the raw launcher settings file in {{opener}}."
+        },
+        "launcherLogDir": {
+          "title": "Launcher Logs Directory"
         }
       }
     }
