@@ -74,7 +74,6 @@ const AboutSettingsPage = () => {
               </Text>
               {isValidSemanticVersion(basicInfo.launcherVersion) && (
                 <Button
-                  disabled={true}
                   variant="subtle"
                   colorScheme={newerVersion.version ? primaryColor : "gray"}
                   size="xs"

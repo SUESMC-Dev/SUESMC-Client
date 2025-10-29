@@ -16,8 +16,13 @@ type SourceTuple = (&'static str, &'static str, fn(&str, &str) -> String);
 const SOURCES: [SourceTuple; 2] = [
   (
     "https://client.suesmc.ltd/api/releases/latest",
-    "version",
-    |_, fname| format!("https://client.suesmc.ltd/releases/{}", fname),
+    "tag_name",
+    |ver, fname| {
+      format!(
+        "https://client.suesmc.ltd/api/releases/download?tag={}&file={}",
+        ver, fname
+      )
+    },
   ),
   (
     "https://api.github.com/repos/SUESMC-dev/SUESMC-Client/releases/latest",
@@ -46,7 +51,7 @@ fn build_resource_filename(ver: &str, os: &str, arch: &str, is_portable: bool) -
     "macos" => ".app.tar.gz",
     _ => "",
   };
-  format!("SJMCL_{}_{}_{}{}", ver, os, arch, suffix)
+  format!("SUESMC-Client_{}_{}_{}{}", ver, os, arch, suffix)
 }
 
 // Generate the new filename on the local disk.
