@@ -1,6 +1,6 @@
 {
   "name": "suesmc-client",
-  "version": "0.5.1-SUESMC-1",
+  "version": "0.5.1-SUESMC-2",
   "private": true,
   "scripts": {
     "dev": "next dev",
