@@ -1,6 +1,6 @@
 {
   "name": "suesmc-client",
-  "version": "0.5.1",
+  "version": "0.5.1-SUESMC-1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -46,6 +46,7 @@
     "@tauri-apps/plugin-os": "^2.3.0",
     "@tauri-apps/plugin-process": "^2.3.0",
     "@tauri-apps/plugin-window-state": "^2.3.0",
+    "bumpp": "^10.3.1",
     "i18next": "^24.0.0",
     "lodash": "^4.17.21",
     "masonic": "^4.0.1",
@@ -60,7 +61,8 @@
     "react-virtualized": "^9.22.6",
     "remark-gfm": "^4.0.1",
     "skinview3d": "^3.1.0",
-    "string-similarity": "^4.0.4"
+    "string-similarity": "^4.0.4",
+    "tauri-version": "^1.0.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.1.2",
