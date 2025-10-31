@@ -75,10 +75,9 @@
     "macOS": {
       "bundleName": "SUESMC Client",
       "dmg": {
-        "background": "assets/misc/dmg_bg.png",
         "windowSize": {
-          "width": 640,
-          "height": 440
+          "width": 700,
+          "height": 500
         }
       }
     },
