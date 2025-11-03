@@ -19,7 +19,7 @@ const SOURCES: [SourceTuple; 2] = [
     "tag_name",
     |ver, fname| {
       format!(
-        "https://client.suesmc.ltd/api/releases/download?tag={}&file={}",
+        "https://client.suesmc.ltd/api/releases/download?tag=v{}&file={}",
         ver, fname
       )
     },

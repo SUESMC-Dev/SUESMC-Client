@@ -139,15 +139,7 @@ jobs:
           SIGNING_SUCCESS: ${{ needs.Code-Sign-macOS.result == 'success' }}
         run: |
           pip install requests packaging
-          python scripts/release/generate_changelog_draft.py > release-notes.md
-          
-          # Add warning if macOS signing failed
-          if [ "${{ env.SIGNING_SUCCESS }}" != "true" ]; then
-            echo "" >> release-notes.md
-            echo "---" >> release-notes.md
-            echo "" >> release-notes.md
-            echo "⚠️ **Note:** macOS artifacts in this release are **not code-signed**. macOS users may see security warnings when running the application." >> release-notes.md
-          fi
+          python scripts/release/generate_simple_changelog_draft.py > release-notes.md
         shell: bash
 
       - name: Create Release
