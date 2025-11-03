@@ -1,10 +1,10 @@
 [package]
 name = "SUESMC-Client"
 version = "0.5.1-3"
-description = "A Minecraft launcher from SJMC, modified by SUESMC-dev"
+description = "A Minecraft launcher from SJMC, modified by SUESMC-Dev"
 authors = ["SJMCL Team", "SUESMC-dev"]
 license = "GNU General Public License v3.0 (with additional terms)"
-repository = "https://github.com/UNIkeEN/SJMCL"
+repository = "https://github.com/SUESMC-Dev/SUESMC-Client"
 edition = "2021"
 rust-version = "1.80.0"
 
