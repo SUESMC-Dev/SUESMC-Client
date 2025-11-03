@@ -30,12 +30,11 @@ on:
         required: false
 
 jobs:
-  sign-macos:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        arch: [aarch64, x86_64]
-    
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.evaluate.outputs.should-run }}
+      missing-secrets: ${{ steps.evaluate.outputs.missing-secrets }}
     steps:
       - name: Validate signing secrets
         id: validate
@@ -64,11 +63,28 @@ jobs:
           if [ ${#MISSING_SECRETS[@]} -gt 0 ]; then
             echo "::warning::⚠️ macOS code signing will be skipped - missing secrets: ${MISSING_SECRETS[*]}"
             echo "The release will continue with unsigned macOS artifacts."
-            exit 1
+            MISSING_SECRETS_CSV=$(IFS=,; echo "${MISSING_SECRETS[*]}")
+            {
+              echo "should-run=false"
+              echo "missing-secrets=$MISSING_SECRETS_CSV"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           
           echo "✅ All required secrets are present"
+          {
+            echo "should-run=true"
+            echo "missing-secrets="
+          } >> "$GITHUB_OUTPUT"
 
+  sign-macos:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.should-run == 'true'
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [aarch64, x86_64]
+    steps:
       - uses: actions/checkout@v4
 
       - name: Download macOS artifacts
