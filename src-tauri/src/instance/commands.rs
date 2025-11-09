@@ -1,6 +1,7 @@
 use super::helpers::loader::fabric::remove_fabric_api_mods;
 use crate::error::SJMCLResult;
-use crate::instance::helpers::client_json::{replace_native_libraries, McClientInfo, PatchesInfo};
+use crate::instance::constants::TRANSLATION_CACHE_EXPIRY_HOURS;
+use crate::instance::helpers::client_json::{replace_native_libraries, McClientInfo};
 use crate::instance::helpers::game_version::{compare_game_versions, get_major_game_version};
 use crate::instance::helpers::loader::common::{execute_processors, install_mod_loader};
 use crate::instance::helpers::loader::forge::InstallProfile;
@@ -8,12 +9,12 @@ use crate::instance::helpers::misc::{
   get_instance_game_config, get_instance_subdir_path_by_id, get_instance_subdir_paths,
   refresh_and_update_instances, unify_instance_name,
 };
-use crate::instance::helpers::modpack::curseforge::CurseForgeManifest;
-use crate::instance::helpers::modpack::misc::{extract_overrides, ModpackMetaInfo};
-use crate::instance::helpers::modpack::modrinth::ModrinthManifest;
-use crate::instance::helpers::modpack::multimc::MultiMcManifest;
+use crate::instance::helpers::modpack::misc::{
+  extract_overrides, get_download_params, ModpackMetaInfo,
+};
 use crate::instance::helpers::mods::common::{
-  add_local_mod_translations, get_mod_info_from_dir, get_mod_info_from_jar,
+  add_local_mod_translations, compress_icon, get_mod_info_from_dir, get_mod_info_from_jar,
+  LocalModTranslationEntry, LocalModTranslationsCache,
 };
 use crate::instance::helpers::options_txt::get_zh_hans_lang_tag;
 use crate::instance::helpers::resourcepack::{
@@ -48,11 +49,12 @@ use regex::{Regex, RegexBuilder};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, State};
 use tauri_plugin_http::reqwest;
 use tokio;
+use tokio::sync::Semaphore;
 use url::Url;
 use zip::read::ZipArchive;
 
@@ -469,6 +471,7 @@ pub async fn retrieve_game_server_list(
 pub async fn retrieve_local_mod_list(
   app: AppHandle,
   instance_id: String,
+  local_mod_translations_cache_state: State<'_, Mutex<LocalModTranslationsCache>>,
 ) -> SJMCLResult<Vec<LocalModInfo>> {
   let mods_dir = match get_instance_subdir_path_by_id(&app, &instance_id, &InstanceSubdirType::Mods)
   {
@@ -483,8 +486,21 @@ pub async fn retrieve_local_mod_list(
 
   let mod_paths = get_files_with_regex(&mods_dir, &valid_extensions).unwrap_or_default();
   let mut tasks = Vec::new();
+  let semaphore = Arc::new(Semaphore::new(
+    std::thread::available_parallelism().unwrap().into(),
+  ));
   for path in mod_paths {
-    let task = tokio::spawn(async move { get_mod_info_from_jar(&path).await.ok() });
+    let permit = semaphore
+      .clone()
+      .acquire_owned()
+      .await
+      .map_err(|_| InstanceError::SemaphoreAcquireFailed)?;
+    let task = tokio::spawn(async move {
+      log::debug!("Load mod info from dir: {}", path.display());
+      let info = get_mod_info_from_jar(&path).await.ok();
+      drop(permit);
+      info
+    });
     tasks.push(task);
   }
   #[cfg(debug_assertions)]
@@ -492,7 +508,17 @@ pub async fn retrieve_local_mod_list(
     // mod information detection from folders is only used for debugging.
     let mod_paths = get_subdirectories(&mods_dir).unwrap_or_default();
     for path in mod_paths {
-      let task = tokio::spawn(async move { get_mod_info_from_dir(&path).await.ok() });
+      let permit = semaphore
+        .clone()
+        .acquire_owned()
+        .await
+        .map_err(|_| InstanceError::SemaphoreAcquireFailed)?;
+      let task = tokio::spawn(async move {
+        log::debug!("Load mod info from dir: {}", path.display());
+        let info = get_mod_info_from_dir(&path).await.ok();
+        drop(permit);
+        info
+      });
       tasks.push(task);
     }
   }
@@ -530,8 +556,15 @@ pub async fn retrieve_local_mod_list(
   let mut translation_tasks = Vec::new();
   for mut mod_info in mod_infos {
     let app = app.clone();
+    let permit = semaphore
+      .clone()
+      .acquire_owned()
+      .await
+      .map_err(|_| InstanceError::SemaphoreAcquireFailed)?;
     let task = tokio::spawn(async move {
+      log::debug!("Translating mod: {}", mod_info.file_name);
       let _ = add_local_mod_translations(&app, &mut mod_info).await;
+      drop(permit);
       mod_info
     });
     translation_tasks.push(task);
@@ -542,9 +575,24 @@ pub async fn retrieve_local_mod_list(
       mod_infos.push(mod_info);
     }
   }
-
   // sort by name (and version)
   mod_infos.sort();
+  let mut cache = local_mod_translations_cache_state.lock()?;
+  for info in mod_infos.iter() {
+    if let Some(entry) = cache.translations.get(&info.file_name) {
+      if !entry.is_expired(TRANSLATION_CACHE_EXPIRY_HOURS) {
+        continue;
+      }
+    }
+    cache.translations.insert(
+      info.file_name.clone(),
+      LocalModTranslationEntry::new(
+        info.translated_name.clone(),
+        info.translated_description.clone(),
+      ),
+    );
+  }
+  cache.save()?;
 
   Ok(mod_infos)
 }
@@ -576,7 +624,7 @@ pub async fn retrieve_resource_pack_list(
       info_list.push(ResourcePackInfo {
         name,
         description,
-        icon_src: icon_src.map(ImageWrapper::from),
+        icon_src: icon_src.map(ImageWrapper::from).map(compress_icon),
         file_path: path.clone(),
       });
     }
@@ -591,7 +639,7 @@ pub async fn retrieve_resource_pack_list(
       info_list.push(ResourcePackInfo {
         name,
         description,
-        icon_src: icon_src.map(ImageWrapper::from),
+        icon_src: icon_src.map(ImageWrapper::from).map(compress_icon),
         file_path: path.clone(),
       });
     }
@@ -628,7 +676,7 @@ pub async fn retrieve_server_resource_pack_list(
       info_list.push(ResourcePackInfo {
         name,
         description,
-        icon_src: icon_src.map(ImageWrapper::from),
+        icon_src: icon_src.map(ImageWrapper::from).map(compress_icon),
         file_path: path.clone(),
       });
     }
@@ -644,7 +692,7 @@ pub async fn retrieve_server_resource_pack_list(
       info_list.push(ResourcePackInfo {
         name,
         description,
-        icon_src: icon_src.map(ImageWrapper::from),
+        icon_src: icon_src.map(ImageWrapper::from).map(compress_icon),
         file_path: path.clone(),
       });
     }
@@ -910,9 +958,9 @@ pub async fn create_instance(
   version_info.jar = Some(name.clone());
 
   // convert vanilla version info to vanilla patch
-  let mut vanilla_patch: PatchesInfo = version_info.clone().into();
+  let mut vanilla_patch = version_info.clone();
   vanilla_patch.id = "game".to_string();
-  vanilla_patch.version = game.id.clone();
+  vanilla_patch.version = Some(game.id.clone());
   vanilla_patch.inherits_from = None;
   version_info.patches.push(vanilla_patch);
 
@@ -977,18 +1025,8 @@ pub async fn create_instance(
   if let Some(modpack_path) = modpack_path {
     let path = PathBuf::from(modpack_path);
     let file = fs::File::open(&path).map_err(|_| InstanceError::FileNotFoundError)?;
-    if let Ok(manifest) = CurseForgeManifest::from_archive(&file) {
-      task_params.extend(manifest.get_download_params(&app, &version_path).await?);
-      extract_overrides(&format!("{}/", manifest.overrides), &file, &version_path)?;
-    } else if let Ok(manifest) = ModrinthManifest::from_archive(&file) {
-      task_params.extend(manifest.get_download_params(&version_path)?);
-      extract_overrides(&String::from("overrides/"), &file, &version_path)?;
-    } else if let Ok(manifest) = MultiMcManifest::from_archive(&file) {
-      let base_path = manifest.base_path;
-      extract_overrides(&format!("{}.minecraft/", base_path), &file, &version_path)?;
-    } else {
-      return Err(InstanceError::ModpackManifestParseError.into());
-    }
+    task_params.extend(get_download_params(&app, &file, &version_path).await?);
+    extract_overrides(&file, &version_path)?;
   }
 
   schedule_progressive_task_group(
@@ -1187,7 +1225,7 @@ pub async fn change_mod_loader(
   }
   // construct new version info
   instance.mod_loader = mod_loader.clone();
-  let mut version_info: McClientInfo = vanilla_info.clone().into();
+  let mut version_info: McClientInfo = vanilla_info.clone();
   version_info.id = current_info.id.clone();
   version_info.jar = Some(instance.name.clone());
   version_info.java_version = current_info.java_version.clone();
@@ -1230,8 +1268,11 @@ pub async fn change_mod_loader(
 }
 
 #[tauri::command]
-pub async fn retrieve_modpack_meta_info(path: String) -> SJMCLResult<ModpackMetaInfo> {
+pub async fn retrieve_modpack_meta_info(
+  app: AppHandle,
+  path: String,
+) -> SJMCLResult<ModpackMetaInfo> {
   let path = PathBuf::from(path);
   let file = fs::File::open(&path).map_err(|_| InstanceError::FileNotFoundError)?;
-  ModpackMetaInfo::from_archive(&file).await
+  ModpackMetaInfo::from_archive(&app, &file).await
 }

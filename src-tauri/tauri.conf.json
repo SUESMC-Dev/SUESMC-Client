@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "SUESMC-Client",
-  "version": "0.5.1-4",
+  "version": "0.6.0",
   "identifier": "ltd.suesmc.client",
   "build": {
     "frontendDist": "../out",
@@ -61,6 +61,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "category": "Game",
     "icon": [
       "assets/icons/32x32.png",
       "assets/icons/64x64.png",
