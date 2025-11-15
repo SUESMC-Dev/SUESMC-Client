@@ -44,6 +44,7 @@ def main():
         return
     latest, previous = tags[0], tags[1]
     diff_url = f"https://github.com/{OWNER}/{REPO}/releases/tag/{latest}"
+    print(f"# {latest}\n")
     print(f"Synced upstream to {latest}, for more information please visit {diff_url}. \n\n---\n\n同步上游到 {latest} ，访问 {diff_url} 了解更多信息。")
 
 
