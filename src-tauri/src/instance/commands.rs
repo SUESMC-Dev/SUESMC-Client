@@ -2,7 +2,7 @@ use super::helpers::loader::fabric::remove_fabric_api_mods;
 use crate::error::SJMCLResult;
 use crate::instance::constants::TRANSLATION_CACHE_EXPIRY_HOURS;
 use crate::instance::helpers::client_json::{replace_native_libraries, McClientInfo};
-use crate::instance::helpers::game_version::{compare_game_versions, get_major_game_version};
+use crate::instance::helpers::game_version::compare_game_versions;
 use crate::instance::helpers::loader::common::{execute_processors, install_mod_loader};
 use crate::instance::helpers::loader::forge::InstallProfile;
 use crate::instance::helpers::misc::{
@@ -20,12 +20,13 @@ use crate::instance::helpers::options_txt::get_zh_hans_lang_tag;
 use crate::instance::helpers::resourcepack::{
   load_resourcepack_from_dir, load_resourcepack_from_zip,
 };
-use crate::instance::helpers::server::{load_servers_info_from_path, query_server_status};
+use crate::instance::helpers::server::{
+  load_servers_info_from_path, query_servers_online, GameServerInfo,
+};
 use crate::instance::helpers::world::{level_data_to_world_info, load_level_data_from_path};
 use crate::instance::models::misc::{
-  GameServerInfo, Instance, InstanceError, InstanceSubdirType, InstanceSummary, LocalModInfo,
-  ModLoader, ModLoaderStatus, ModLoaderType, ResourcePackInfo, SchematicInfo, ScreenshotInfo,
-  ShaderPackInfo,
+  Instance, InstanceError, InstanceSubdirType, InstanceSummary, LocalModInfo, ModLoader,
+  ModLoaderStatus, ModLoaderType, ResourcePackInfo, SchematicInfo, ScreenshotInfo, ShaderPackInfo,
 };
 use crate::instance::models::world::base::WorldInfo;
 use crate::instance::models::world::level::LevelData;
@@ -51,7 +52,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
-use tauri::{AppHandle, Manager, State};
+use tauri::State;
+use tauri::{AppHandle, Manager};
 use tauri_plugin_http::reqwest;
 use tokio;
 use tokio::sync::Semaphore;
@@ -61,8 +63,8 @@ use zip::read::ZipArchive;
 #[tauri::command]
 pub async fn retrieve_instance_list(app: AppHandle) -> SJMCLResult<Vec<InstanceSummary>> {
   refresh_and_update_instances(&app, false).await; // firstly refresh and update
-  let binding = app.state::<Mutex<HashMap<String, Instance>>>();
-  let instances = binding.lock().unwrap().clone();
+  let instance_binding = app.state::<Mutex<HashMap<String, Instance>>>();
+  let instances = instance_binding.lock().unwrap().clone();
   let mut summary_list = Vec::new();
   let global_version_isolation = get_global_game_config(&app).version_isolation;
   for (id, instance) in instances.iter() {
@@ -78,26 +80,27 @@ pub async fn retrieve_instance_list(app: AppHandle) -> SJMCLResult<Vec<InstanceS
         global_version_isolation
       };
 
-    summary_list.push(InstanceSummary {
-      id: id.clone(),
-      name: instance.name.clone(),
-      description: instance.description.clone(),
-      icon_src: instance.icon_src.clone(),
-      starred: instance.starred,
-      play_time: instance.play_time,
-      version_path: instance.version_path.clone(),
-      version: instance.version.clone(),
-      mod_loader: instance.mod_loader.clone(),
-      // skip fallback remote fetch in `get_major_game_version` and `compare_game_versions` to avoid instance list load delay.
-      // ref: https://github.com/UNIkeEN/SJMCL/pull/799
-      major_version: get_major_game_version(&app, &instance.version, false).await,
-      support_quick_play: compare_game_versions(&app, &instance.version, "23w14a", false)
-        .await
-        .is_ge(),
-      use_spec_game_config: instance.use_spec_game_config,
-      is_version_isolated,
-    });
+    summary_list
+      .push(InstanceSummary::from_instance(&app, id.clone(), instance, is_version_isolated).await);
   }
+
+  // ensure an instance is selected if instance list is not empty
+  if !summary_list.is_empty() {
+    let config_binding = app.state::<Mutex<LauncherConfig>>();
+    let mut config_state = config_binding.lock()?;
+    if !summary_list
+      .iter()
+      .any(|instance| instance.id == config_state.states.shared.selected_instance_id)
+    {
+      config_state.partial_update(
+        &app,
+        "states.shared.selected_instance_id",
+        &serde_json::to_string(&summary_list[0].id).unwrap_or_default(),
+      )?;
+      config_state.save()?;
+    }
+  }
+
   Ok(summary_list)
 }
 
@@ -192,45 +195,40 @@ pub fn retrieve_instance_subdir_path(
 }
 
 #[tauri::command]
-pub async fn delete_instance(app: AppHandle, instance_id: String) -> SJMCLResult<()> {
-  let version_path = {
-    let instance_binding = app.state::<Mutex<HashMap<String, Instance>>>();
-    let instance_state = instance_binding.lock()?;
-
-    let instance = instance_state
-      .get(&instance_id)
-      .ok_or(InstanceError::InstanceNotFoundByID)?;
-
-    instance.version_path.clone()
-  };
-
-  let path = Path::new(&version_path);
-  if path.exists() {
-    tokio::fs::remove_dir_all(path).await?;
-  }
-
-  // not update instance state here. if send success to frontend, it will call retrieve_instance_list and update state there.
+pub fn delete_instance(app: AppHandle, instance_id: String) -> SJMCLResult<()> {
+  let instance_binding = app.state::<Mutex<HashMap<String, Instance>>>();
+  let instance_state = instance_binding.lock().unwrap();
 
   let config_binding = app.state::<Mutex<LauncherConfig>>();
   let mut config_state = config_binding.lock()?;
 
-  if instance_id == config_state.states.shared.selected_instance_id {
-    let instance_binding = app.state::<Mutex<HashMap<String, Instance>>>();
-    let instance_state = instance_binding.lock()?;
-    let new_selected_id = instance_state
-      .keys()
-      .next()
-      .cloned()
-      .unwrap_or_else(|| "".to_string());
+  let instance = instance_state
+    .get(&instance_id)
+    .ok_or(InstanceError::InstanceNotFoundByID)?;
 
+  let version_path = &instance.version_path;
+  let path = Path::new(version_path);
+
+  if path.exists() {
+    fs::remove_dir_all(path)?;
+  }
+  // not update state here. if send success to frontend, it will call retrieve_instance_list and update state there.
+
+  if config_state.states.shared.selected_instance_id == instance_id {
     config_state.partial_update(
       &app,
       "states.shared.selected_instance_id",
-      &serde_json::to_string(&new_selected_id).unwrap_or_default(),
+      &serde_json::to_string(
+        &instance_state
+          .keys()
+          .next()
+          .cloned()
+          .unwrap_or_else(|| "".to_string()),
+      )
+      .unwrap_or_default(),
     )?;
     config_state.save()?;
   }
-
   Ok(())
 }
 
@@ -407,7 +405,6 @@ pub async fn retrieve_game_server_list(
   query_online: bool,
 ) -> SJMCLResult<Vec<GameServerInfo>> {
   // query_online is false, return local data from nbt (servers.dat)
-  let mut game_servers: Vec<GameServerInfo> = Vec::new();
   let game_root_dir =
     match get_instance_subdir_path_by_id(&app, &instance_id, &InstanceSubdirType::Root) {
       Some(path) => path,
@@ -415,55 +412,16 @@ pub async fn retrieve_game_server_list(
     };
 
   let nbt_path = game_root_dir.join("servers.dat");
-  let servers = match load_servers_info_from_path(&nbt_path).await {
+  let mut game_servers = match load_servers_info_from_path(&nbt_path).await {
     Ok(servers) => servers,
     Err(_) => return Err(InstanceError::ServerNbtReadError.into()),
   };
-  for server in servers {
-    game_servers.push(GameServerInfo {
-      ip: server.ip,
-      name: server.name,
-      description: String::new(),
-      icon_src: server.icon.unwrap_or_default(),
-      is_queried: false,
-      players_max: 0,
-      players_online: 0,
-      online: false,
-    });
-  }
 
   // query_online is true, amend query and return player count and online status
   if query_online {
-    let query_tasks = game_servers.clone().into_iter().map(|mut server| {
-      tokio::spawn({
-        async move {
-          match query_server_status(&server.ip).await {
-            Ok(query_result) => {
-              server.is_queried = true;
-              server.players_online = query_result.players.online as usize;
-              server.players_max = query_result.players.max as usize;
-              server.online = query_result.online;
-              server.description = query_result.description.text.unwrap_or_default();
-              server.icon_src = query_result.favicon.unwrap_or_default();
-            }
-            Err(_) => {
-              server.is_queried = false;
-            }
-          }
-          server
-        }
-      })
-    });
-    let mut updated_servers = Vec::new();
-    for (prev, query) in game_servers.into_iter().zip(query_tasks) {
-      if let Ok(updated_server) = query.await {
-        updated_servers.push(updated_server);
-      } else {
-        updated_servers.push(prev); // query error, use local data
-      }
-    }
-    game_servers = updated_servers;
+    game_servers = query_servers_online(game_servers).await?;
   }
+
   Ok(game_servers)
 }
 
@@ -962,6 +920,7 @@ pub async fn create_instance(
   vanilla_patch.id = "game".to_string();
   vanilla_patch.version = Some(game.id.clone());
   vanilla_patch.inherits_from = None;
+  vanilla_patch.priority = Some(0);
   version_info.patches.push(vanilla_patch);
 
   let mut task_params = Vec::<PTaskParam>::new();
