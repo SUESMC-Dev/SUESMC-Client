@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "SUESMC-Client",
-  "version": "0.6.2-1",
+  "productName": "SJMCL",
+  "version": "0.6.3",
   "identifier": "SJMCL",
   "build": {
     "frontendDist": "../out",

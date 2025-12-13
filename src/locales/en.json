@@ -45,6 +45,10 @@
           "title": "LittleSkin",
           "description": "Thanks to LittleSkin and @tnqzh123 for their help with the login process design"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "Thanks to the SCL developers for the ongoing communication and mutual inspiration with SJMCL Team"
+        },
         "skinview3d": {
           "title": "bs-community / skinview3d",
           "description": "Our skin preview component is built based on this open-source project, under the MIT License"
@@ -229,12 +233,19 @@
     "button": {
       "addAndImport": "Add & Import",
       "globalSettings": "Global Game Settings",
-      "launch": "Launch Game"
+      "launch": "Launch Game",
+      "sortAndFilter": "Sort and Filter"
     },
     "viewTypeList": {
       "grid": "Grid View",
       "list": "List View"
     },
+    "sortByTypeList": {
+      "versionAsc": "Game Version Ascending",
+      "versionDesc": "Game Version Descending",
+      "name": "Instance Name"
+    },
+    "sortBy": "Sort by",
     "title": "All Instances"
   },
   "AppearanceSettingsPage": {
@@ -842,7 +853,7 @@
     "scrollToBottom": "Scroll to Bottom"
   },
   "GameVersionSelector": {
-    "old_beta": "Old Beta",
+    "old_beta": "Beta",
     "release": "Release",
     "snapshot": "Snapshot",
     "april_fools": "April Fools",
@@ -1215,8 +1226,8 @@
     "description": "Instance Description",
     "icon": "Instance Icon",
     "applySettings": "Apply the following specific settings",
-    "restoreSettings": "Restore to default settings",
-    "restoreSettingsDesc": "Restore the following specific settings to their default values",
+    "restoreSettings": "Reset specific settings",
+    "restoreSettingsDesc": "Reset the following specific settings to the global game settings.",
     "restore": "Restore",
     "errorMessage": {
       "error-1": "Instance name cannot be empty",
@@ -1370,6 +1381,11 @@
     "placeholder": {
       "javaPath": "Please enter or select the Java executable file path"
     }
+  },
+  "MCVersionNumberHelper": {
+    "content": "Starting in 2026, Minecraft adopts a new version numbering system. The version numbers will begin with the release year (e.g., 26.1), replacing the previous 1.x versioning scheme.",
+    "linkText": "Read the official article",
+    "url": "https://www.minecraft.net/en-us/article/minecraft-new-version-numbering-system"
   },
   "MemoryStatusProgress": {
     "title": "Memory Status",
@@ -1865,7 +1881,8 @@
           "title": "Failed to add offline player",
           "description": {
             "DUPLICATE": "Player already exists",
-            "INVALID": "UUID is invalid"
+            "INVALID": "UUID is invalid",
+            "TEXTURE_ERROR": "Unable to get player texture"
           }
         }
       },

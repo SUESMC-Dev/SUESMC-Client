@@ -45,6 +45,10 @@
           "title": "LittleSkin",
           "description": "感谢 LittleSkin 和 @tnqzh123 对登录流程设计的帮助"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "感谢 SCL 开发团队与 SJMCL 开发团队的持续交流与相互启发"
+        },
         "skinview3d": {
           "title": "bs-community / skinview3d",
           "description": "皮肤预览组件基于此开源项目实现，遵循 MIT 协议使用"
@@ -229,12 +233,19 @@
     "button": {
       "addAndImport": "添加与导入",
       "globalSettings": "全局游戏设置",
-      "launch": "启动游戏"
+      "launch": "启动游戏",
+      "sortAndFilter": "排序与筛选"
     },
     "viewTypeList": {
       "grid": "网格视图",
       "list": "列表视图"
     },
+    "sortByTypeList": {
+      "versionAsc": "游戏版本升序",
+      "versionDesc": "游戏版本降序",
+      "name": "实例名称"
+    },
+    "sortBy": "排序方式",
     "title": "全部实例"
   },
   "AppearanceSettingsPage": {
@@ -1371,6 +1382,11 @@
       "javaPath": "请输入或选择 Java 可执行文件路径"
     }
   },
+  "MCVersionNumberHelper": {
+    "content": "自 2026 年起，Minecraft 版本号采取新的命名规则，以年份作为版本号首位（如 26.1）以取代原有的 1.x 版本号规则。",
+    "linkText": "阅读官方文档",
+    "url": "https://www.minecraft.net/zh-hans/article/minecraft-new-version-numbering-system"
+  },
   "MemoryStatusProgress": {
     "title": "内存状态",
     "info": "{{used}} / {{total}} GB 已使用",
@@ -1865,7 +1881,8 @@
           "title": "离线角色添加失败",
           "description": {
             "DUPLICATE": "角色已存在",
-            "INVALID": "UUID 无效"
+            "INVALID": "UUID 无效",
+            "TEXTURE_ERROR": "角色皮肤获取失败"
           }
         }
       },
