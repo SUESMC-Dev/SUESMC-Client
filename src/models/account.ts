@@ -51,6 +51,8 @@ export interface AuthServer {
 export interface AuthServerFeatures {
   nonEmailLogin: boolean;
   openidConfigurationUrl: string;
+  clubAttendanceUrl?: string;
+  clubAttendancePage?: string;
 }
 
 export interface DeviceAuthResponseInfo {

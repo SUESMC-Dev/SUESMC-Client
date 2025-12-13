@@ -12,9 +12,11 @@ use crate::error::SJMCLResult;
 use crate::launcher_config::models::LauncherConfig;
 use crate::storage::Storage;
 use crate::utils::fs::get_app_resource_filepath;
+use serde_json::json;
 use std::path::Path;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
+use tauri_plugin_http::reqwest;
 use url::Url;
 
 #[tauri::command]
@@ -86,10 +88,11 @@ pub async fn fetch_oauth_code(
   auth_server_url: String,
 ) -> SJMCLResult<DeviceAuthResponseInfo> {
   if server_type == PlayerType::ThirdParty {
-    let auth_server = AuthServer::from(get_auth_server_info_by_url(&app, auth_server_url)?);
+    let auth_server = AuthServer::from(get_auth_server_info_by_url(&app, auth_server_url.clone())?);
 
     authlib_injector::oauth::device_authorization(
       &app,
+      auth_server_url,
       auth_server.features.openid_configuration_url,
       auth_server.client_id,
     )
@@ -618,4 +621,42 @@ pub fn delete_auth_server(app: AppHandle, url: String) -> SJMCLResult<()> {
   account_state.save()?;
   config_state.save()?;
   Ok(())
+}
+
+#[tauri::command]
+pub async fn fetch_attendance_data(
+  app: AppHandle,
+  attendance_url: String,
+  access_token: String,
+  locale: String,
+) -> SJMCLResult<serde_json::Value> {
+  let client = app.state::<reqwest::Client>();
+
+  let accept_language = if locale.starts_with("zh") {
+    "zh_CN"
+  } else {
+    "en"
+  };
+
+  let response = client
+    .post(&attendance_url)
+    .query(&[("lang", accept_language)])
+    .json(&json!({
+      "accessToken": access_token
+    }))
+    .send()
+    .await
+    .map_err(|_| AccountError::NetworkError)?;
+
+  if response.status().is_success() {
+    let json: serde_json::Value = response
+      .json()
+      .await
+      .map_err(|_| AccountError::ParseError)?;
+    Ok(json)
+  } else if response.status() == reqwest::StatusCode::FORBIDDEN {
+    Err(AccountError::Expired.into())
+  } else {
+    Err(AccountError::NetworkError.into())
+  }
 }

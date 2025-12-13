@@ -243,4 +243,24 @@ export class AccountService {
   static async deleteAuthServer(url: string): Promise<InvokeResponse<void>> {
     return await invoke("delete_auth_server", { url });
   }
+
+  /**
+   * FETCH attendance data from the club attendance URL.
+   * @param {string} attendanceUrl - The URL to fetch attendance data from.
+   * @param {string} accessToken - The access token for authentication.
+   * @param {string} locale - The locale to use for the request.
+   * @returns {Promise<InvokeResponse<any>>}
+   */
+  @responseHandler("account")
+  static async fetchAttendanceData(
+    attendanceUrl: string,
+    accessToken: string,
+    locale: string
+  ): Promise<InvokeResponse<any>> {
+    return await invoke("fetch_attendance_data", {
+      attendanceUrl,
+      accessToken,
+      locale,
+    });
+  }
 }

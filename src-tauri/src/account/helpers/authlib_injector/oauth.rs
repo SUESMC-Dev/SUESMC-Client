@@ -1,5 +1,5 @@
 use crate::account::helpers::authlib_injector::common::{parse_profile, retrieve_profile};
-use crate::account::helpers::authlib_injector::constants::SCOPE;
+use crate::account::helpers::authlib_injector::constants::{EXTRA_SCOPE, SCOPE};
 use crate::account::helpers::authlib_injector::models::MinecraftProfile;
 use crate::account::helpers::misc::oauth_polling;
 use crate::account::models::{
@@ -12,6 +12,7 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_http::reqwest;
+use url::Url;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 struct OpenIDConfig {
@@ -55,10 +56,23 @@ async fn fetch_jwks(app: &AppHandle, jwks_uri: String) -> SJMCLResult<Value> {
 
 pub async fn device_authorization(
   app: &AppHandle,
+  auth_server_url: String,
   openid_configuration_url: String,
   client_id: Option<String>,
 ) -> SJMCLResult<DeviceAuthResponseInfo> {
   let client = app.state::<reqwest::Client>();
+
+  let url = Url::parse(&auth_server_url).map_err(|_| AccountError::ParseError)?;
+  let domain = url.host_str().unwrap_or_default();
+  let extra_scopes = EXTRA_SCOPE
+    .iter()
+    .find(|(d, _)| d == &domain)
+    .map(|(_, s)| *s);
+  let scope = format!(
+    "{}{}",
+    SCOPE,
+    extra_scopes.map(|s| format!(" {}", s)).unwrap_or_default()
+  );
 
   let openid_configuration = fetch_openid_configuration(app, openid_configuration_url).await?;
 
@@ -66,7 +80,7 @@ pub async fn device_authorization(
     .post(openid_configuration.device_authorization_endpoint)
     .form(&[
       ("client_id", client_id.clone().unwrap_or_default()),
-      ("scope", SCOPE.to_string()),
+      ("scope", scope),
     ])
     .send()
     .await
