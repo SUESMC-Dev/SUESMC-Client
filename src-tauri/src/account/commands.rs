@@ -88,10 +88,11 @@ pub async fn fetch_oauth_code(
   auth_server_url: String,
 ) -> SJMCLResult<DeviceAuthResponseInfo> {
   if server_type == PlayerType::ThirdParty {
-    let auth_server = AuthServer::from(get_auth_server_info_by_url(&app, auth_server_url)?);
+    let auth_server = AuthServer::from(get_auth_server_info_by_url(&app, auth_server_url.clone())?);
 
     authlib_injector::oauth::device_authorization(
       &app,
+      auth_server_url,
       auth_server.features.openid_configuration_url,
       auth_server.client_id,
     )
