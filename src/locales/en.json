@@ -314,6 +314,35 @@
       }
     }
   },
+  "AttendanceCard": {
+    "title": "Online Time"
+  },
+  "AttendancePage": {
+    "title": "Attendance",
+    "termStatus": "Term Status",
+    "currentTerm": "Current Term",
+    "attendanceProgress": "Attendance Progress",
+    "termInfo": "Week {{start}}-{{end}}",
+    "excluding": " (excluding Week {{exempt}})",
+    "noRecord": "No Record",
+    "serverLoginLog": "Server login log",
+    "afkTime": "AFK time: {{afkTime}}",
+    "weeklyAttendance": "Weekly Attendance",
+    "onlineTime": "Online Time",
+    "weekOnlineTime": "Online Time of this week",
+    "error": {
+      "noSelectedPlayer": "No player selected",
+      "notAvailable": "Attendance feature not available for this server.",
+      "fetchFailed": "Failed to fetch data: {{message}}",
+      "unknown": "An error occurred while fetching data.",
+      "expired": "Session expired. Please re-login to continue."
+    },
+    "button": {
+      "page": "Open in browser",
+      "pageDescription": "Check all online time and extra attendance records",
+      "relogin": "Re-login"
+    }
+  },
   "ChangeModLoaderModal": {
     "header": {
       "title": {

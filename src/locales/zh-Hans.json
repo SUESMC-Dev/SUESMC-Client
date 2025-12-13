@@ -314,6 +314,35 @@
       }
     }
   },
+  "AttendanceCard": {
+    "title": "在线时长"
+  },
+  "AttendancePage": {
+    "title": "考勤详情",
+    "termStatus": "学期状态",
+    "currentTerm": "当前学期",
+    "attendanceProgress": "考勤进度",
+    "termInfo": "第 {{start}}-{{end}} 周",
+    "excluding": " （{{exempt}} 周不计在内）",
+    "noRecord": "无记录",
+    "serverLoginLog": "服务器登录记录（近一周）",
+    "afkTime": "挂机时长：{{afkTime}}",
+    "weeklyAttendance": "每周考勤",
+    "onlineTime": "在线时长",
+    "weekOnlineTime": "本周在线时长",
+    "error": {
+      "noSelectedPlayer": "尚未选择角色",
+      "notAvailable": "请选择支持考勤的角色",
+      "fetchFailed": "获取数据失败: {{message}}",
+      "unknown": "获取数据时发生错误",
+      "expired": "会话已过期，请重新登录"
+    },
+    "button": {
+      "page": "在浏览器打开",
+      "pageDescription": "查看所有在线时间和额外考勤记录",
+      "relogin": "重新登录"
+    }
+  },
   "ChangeModLoaderModal": {
     "header": {
       "title": {
