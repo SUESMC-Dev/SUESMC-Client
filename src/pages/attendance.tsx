@@ -25,6 +25,7 @@ import PlayersView from "@/components/players-view";
 import { useGlobalData } from "@/contexts/global-data";
 import { useSharedModals } from "@/contexts/shared-modal";
 import { PlayerType } from "@/enums/account";
+import { AccountServiceError } from "@/enums/service-error";
 import { Player } from "@/models/account";
 import { AttendanceData } from "@/models/attendance";
 import { AccountService } from "@/services/account";
@@ -76,6 +77,41 @@ const AttendancePage = () => {
   useEffect(() => {
     setPlayerList(getPlayerList() || []);
   }, [getPlayerList]);
+
+  const refreshData = () => {
+    setLoading(true);
+    if (
+      selectedPlayer &&
+      selectedPlayer.playerType === PlayerType.ThirdParty &&
+      !selectedPlayer.authServer?.features?.clubAttendanceUrl
+    ) {
+      handleRefreshPlayer();
+      return;
+    }
+    fetchData();
+  };
+
+  const handleRefreshPlayer = () => {
+    if (!selectedPlayer) {
+      return;
+    }
+    AccountService.refreshPlayer(selectedPlayer.id)
+      .then((response) => {
+        if (response.status === "success") {
+          getPlayerList(true);
+        } else if (response.raw_error === AccountServiceError.Expired) {
+          setIsExpired(true);
+          setError(t("AttendancePage.error.expired"));
+          openSharedModal("relogin", {
+            selectedPlayer,
+            onSuccess: () => getPlayerList(true),
+          });
+        }
+      })
+      .finally(() => {
+        fetchData();
+      });
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -287,11 +323,12 @@ const AttendancePage = () => {
                   variant="subtle"
                   icon="refresh"
                   size="xs"
-                  onClick={fetchData}
+                  onClick={refreshData}
                   isLoading={loading}
                   disabled={
                     isExpired ||
-                    !selectedPlayer?.authServer?.features.clubAttendanceUrl
+                    !selectedPlayer ||
+                    selectedPlayer.playerType !== PlayerType.ThirdParty
                   }
                 />
               </HStack>

@@ -224,8 +224,8 @@ structstruck::strike! {
     pub features: struct {
       pub non_email_login: bool,
       pub openid_configuration_url: String,
-      pub club_attendance_url: String,
-      pub club_attendance_page: String,
+      pub club_attendance_url: Option<String>,
+      pub club_attendance_page: Option<String>,
     },
     pub client_id: Option<String>,
   }
@@ -266,12 +266,10 @@ impl From<AuthServerInfo> for AuthServer {
           .to_string(),
         club_attendance_url: info.metadata["meta"]["feature.clubAttendanceUrl"]
           .as_str()
-          .unwrap_or_default()
-          .to_string(),
+          .map(|s| s.to_string()),
         club_attendance_page: info.metadata["meta"]["feature.clubAttendancePage"]
           .as_str()
-          .unwrap_or_default()
-          .to_string(),
+          .map(|s| s.to_string()),
       },
       client_id: info.client_id,
     }
