@@ -21,6 +21,7 @@ const tauriConfigPath = path.join(__dirname, "../../src-tauri/tauri.conf.json");
 const tauriConfig = JSON.parse(fs.readFileSync(tauriConfigPath, "utf8"));
 tauriConfig.productName = "SUESMC-Client";
 tauriConfig.version = newVersion;
+tauriConfig.identifier = "ltd.suesmc.client";
 fs.writeFileSync(tauriConfigPath, JSON.stringify(tauriConfig, null, 2) + "\n");
 
 // Update Cargo.toml
