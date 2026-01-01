@@ -91,27 +91,27 @@ const AttendancePage = () => {
     fetchData();
   };
 
-  const handleRefreshPlayer = () => {
+  const handleRefreshPlayer = useCallback(() => {
     if (!selectedPlayer) {
       return;
     }
-    AccountService.refreshPlayer(selectedPlayer.id)
-      .then((response) => {
-        if (response.status === "success") {
-          getPlayerList(true);
-        } else if (response.raw_error === AccountServiceError.Expired) {
-          setIsExpired(true);
-          setError(t("AttendancePage.error.expired"));
-          openSharedModal("relogin", {
-            selectedPlayer,
-            onSuccess: () => getPlayerList(true),
-          });
-        }
-      })
-      .finally(() => {
-        fetchData();
-      });
-  };
+    AccountService.refreshPlayer(selectedPlayer.id).then((response) => {
+      if (response.status === "success") {
+        getPlayerList(true);
+      } else if (response.raw_error === AccountServiceError.Expired) {
+        setIsExpired(true);
+        setError(t("AttendancePage.error.expired"));
+        openSharedModal("relogin", {
+          player: selectedPlayer,
+          onSuccess: () => getPlayerList(true),
+        });
+        setLoading(false);
+      } else {
+        setError(response.message);
+        setLoading(false);
+      }
+    });
+  }, [selectedPlayer, getPlayerList, t, openSharedModal]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -141,8 +141,7 @@ const AttendancePage = () => {
           response.raw_error === "EXPIRED" ||
           response.details === "EXPIRED"
         ) {
-          setIsExpired(true);
-          setError(t("AttendancePage.error.expired"));
+          handleRefreshPlayer();
         } else {
           setError(
             t("AttendancePage.error.fetchFailed", {
@@ -157,7 +156,7 @@ const AttendancePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedPlayer, i18n.language, t]);
+  }, [selectedPlayer, i18n.language, t, handleRefreshPlayer]);
 
   useEffect(() => {
     fetchData();
