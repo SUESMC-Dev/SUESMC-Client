@@ -1,5 +1,4 @@
 import {
-  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,8 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { OptionItem } from "@/components/common/option-item";
+import PlayerAvatar from "@/components/player-avatar";
 import { Player } from "@/models/account";
-import { base64ImgSrc } from "@/utils/string";
 
 interface SelectPlayerModalProps extends Omit<ModalProps, "children"> {
   candidatePlayers: Player[];
@@ -34,7 +33,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
         <ModalHeader>{t("SelectPlayerModal.header.title")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={4}>
-          <VStack spacing={2} alignItems="start" w="full">
+          <VStack spacing={0} alignItems="stretch">
             {candidatePlayers.map((player) => (
               <OptionItem
                 key={player.id}
@@ -45,11 +44,10 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
                 }
                 w="full"
                 prefixElement={
-                  <Image
+                  <PlayerAvatar
+                    avatar={player.avatar}
                     boxSize="32px"
                     objectFit="cover"
-                    src={base64ImgSrc(player.avatar)}
-                    alt={player.name}
                     m={2}
                   />
                 }

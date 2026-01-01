@@ -60,6 +60,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       version: ${{ needs.Version-Check.outputs.version }}
+      branch: ${{ github.ref }}
       upload_artifacts: true
       branch: ${{ github.ref }}
     secrets:

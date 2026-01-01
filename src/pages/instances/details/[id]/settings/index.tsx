@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import Editable from "@/components/common/editable";
 import {
   OptionItemGroup,
@@ -23,6 +23,7 @@ import { useLauncherConfig } from "@/contexts/config";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useToast } from "@/contexts/toast";
 import { InstanceService } from "@/services/instance";
+import { getInstanceIconSrc } from "@/utils/instance";
 import { isFileNameSanitized } from "@/utils/string";
 
 const InstanceSettingsPage = () => {
@@ -108,16 +109,18 @@ const InstanceSettingsPage = () => {
           children: (
             <HStack>
               <Image
-                src={summary?.iconSrc}
+                src={getInstanceIconSrc(summary?.iconSrc, summary?.versionPath)}
                 alt={summary?.iconSrc}
                 boxSize="28px"
-                objectFit="cover"
+                fallbackSrc="/images/icons/JEIcon_Release.png"
               />
               <InstanceIconSelectorPopover
                 value={summary?.iconSrc}
                 onIconSelect={(value) => {
                   handleUpdateInstanceConfig("iconSrc", value);
                 }}
+                versionPath={summary?.versionPath}
+                instanceId={summary?.id}
               />
             </HStack>
           ),
@@ -191,15 +194,19 @@ const InstanceSettingsPage = () => {
         ))}
         {!useSpecGameConfig && (
           <Text className="secondary-text" fontSize="xs-sm" textAlign="center">
-            {t("InstanceSettingsPage.tipsToGlobal.part-1")}
-            <Link
-              color={`${primaryColor}.500`}
-              onClick={() => {
-                router.push("/settings/global-game");
+            <Trans
+              i18nKey="InstanceSettingsPage.tipsToGlobal.content"
+              components={{
+                terms: (
+                  <Link
+                    color={`${primaryColor}.500`}
+                    onClick={() => {
+                      router.push("/settings/global-game");
+                    }}
+                  />
+                ),
               }}
-            >
-              {t("InstanceSettingsPage.tipsToGlobal.part-2")}
-            </Link>
+            />
           </Text>
         )}
       </VStack>

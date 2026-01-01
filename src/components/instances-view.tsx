@@ -18,7 +18,7 @@ import InstanceMenu from "@/components/instance-menu";
 import { useLauncherConfig } from "@/contexts/config";
 import { useGlobalData } from "@/contexts/global-data";
 import { InstanceSummary } from "@/models/instance/misc";
-import { generateInstanceDesc } from "@/utils/instance";
+import { generateInstanceDesc, getInstanceIconSrc } from "@/utils/instance";
 
 interface InstancesViewProps extends BoxProps {
   instances: InstanceSummary[];
@@ -63,18 +63,16 @@ const InstancesView: React.FC<InstancesViewProps> = ({
         />
         <Image
           boxSize="32px"
-          objectFit="cover"
-          src={instance.iconSrc}
+          src={getInstanceIconSrc(instance.iconSrc, instance.versionPath)}
           alt={instance.name}
+          fallbackSrc="/images/icons/JEIcon_Release.png"
         />
       </HStack>
     ),
-    ...(withMenu
-      ? {}
-      : {
-          isFullClickZone: true,
-          onClick: () => handleUpdateSelectedInstance(instance),
-        }),
+    ...(!withMenu && {
+      isFullClickZone: true,
+      onClick: () => handleUpdateSelectedInstance(instance),
+    }),
     children: withMenu ? (
       <InstanceMenu instance={instance} variant="buttonGroup" />
     ) : (
@@ -86,7 +84,14 @@ const InstancesView: React.FC<InstancesViewProps> = ({
     cardContent: {
       title: instance.name,
       description: generateInstanceDesc(instance) || String.fromCharCode(160),
-      image: instance.iconSrc,
+      image: (
+        <Image
+          boxSize="36px"
+          src={getInstanceIconSrc(instance.iconSrc, instance.versionPath)}
+          alt={instance.name}
+          fallbackSrc="/images/icons/JEIcon_Release.png"
+        />
+      ),
       extraContent: (
         <HStack spacing={1} position="absolute" top={0.5} right={1}>
           {instance.starred && <Icon as={FaStar} color="yellow.500" />}

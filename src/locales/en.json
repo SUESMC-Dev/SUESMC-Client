@@ -422,7 +422,7 @@
     "tag": {
       "source": "Source"
     },
-    "body": "to",
+    "content": "{{type}} <b>{{name}}</b> to",
     "resourceType": {
       "Root": "",
       "ResourcePacks": "Resource Packs",
@@ -964,8 +964,7 @@
         "discoverPage": {
           "title": "Discover Page",
           "openNotice": {
-            "part-1": "The 'Search' in the top navigation bar has been replaced with 'Discover'. You can continue using the 'Global Search' through the keyboard shortcut ",
-            "part-2": "."
+            "content": "The 'Search' in the top navigation bar has been replaced with 'Discover'. You can continue using the 'Global Search' through the keyboard shortcut <key>{{keyname}}</key> + <key>S</key>."
           }
         },
         "instancesNavType": {
@@ -1215,6 +1214,9 @@
       "launch": "Launch Instance"
     }
   },
+  "InstanceIconSelector": {
+    "customize": "Customize Icon"
+  },
   "InstanceMenu": {
     "label": {
       "details": "Instance Details",
@@ -1264,8 +1266,7 @@
       "error-3": "Instance name is too long"
     },
     "tipsToGlobal": {
-      "part-1": "This instance is not using specific settings. ",
-      "part-2": "Go to Global Game Settings"
+      "content": "This instance is not using specific settings. <terms>Go to Global Game Settings</terms>"
     }
   },
   "InstanceShaderPacksPage": {
@@ -2419,6 +2420,12 @@
             "MODPACK_MANIFEST_PARSE_ERROR": "Modpack manifest file parse error"
           }
         }
+      },
+      "addCustomInstanceIcon": {
+        "success": "Successfully added custom instance icon",
+        "error": {
+          "title": "Failed to add custom instance icon"
+        }
       }
     },
     "task": {
@@ -2579,12 +2586,11 @@
       "title": "Welcome!"
     },
     "body": {
-      "part1": "Welcome to SUESMC Client! This is a modified version of SJMC Launcher. Therefore, before you start, please be sure to read and agree to SJMC Launcher ",
-      "terms": "User Agreement",
-      "periods": "."
+      "text": "Welcome to SUESMC Client! This is a modified version of SJMC Launcher. Therefore, before you start, please be sure to read and agree to SJMC Launcher <terms>User Agreement</terms>."
     },
     "warning": {
-      "unstableVersion": "You are using the {{versionLabel}} of SUESMC Client. Some features may be unstable or incomplete. Bug reports and feature requests are welcome."
+      "unstableVersion": "You are using the {{versionLabel}} of SUESMC Client. Some features may be unstable or incomplete. Bug reports and feature requests are welcome.",
+      "winArm64Notice": "SUESMC Client now supports Windows on Arm. If you are using a <b>QUALCOMM</b> platform, you may need to install the <glpack>OpenGL Compatibility Pack</glpack> before launching the game."
     },
     "button": {
       "exit": "Exit",
