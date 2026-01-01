@@ -7,7 +7,6 @@ import {
   GridItem,
   HStack,
   Icon,
-  Image,
   SkeletonProps,
   Text,
   VStack,
@@ -21,6 +20,7 @@ import { CommonIconButton } from "@/components/common/common-icon-button";
 import { OptionItemGroup } from "@/components/common/option-item";
 import { Section } from "@/components/common/section";
 import { SwitchButton } from "@/components/common/switch-button";
+import PlayerAvatar from "@/components/player-avatar";
 import PlayersView from "@/components/players-view";
 import { useGlobalData } from "@/contexts/global-data";
 import { useSharedModals } from "@/contexts/shared-modal";
@@ -30,7 +30,6 @@ import { Player } from "@/models/account";
 import { AttendanceData } from "@/models/attendance";
 import { AccountService } from "@/services/account";
 import { generatePlayerDesc } from "@/utils/account";
-import { base64ImgSrc } from "@/utils/string";
 
 const StatusBanner = ({
   status,
@@ -206,11 +205,10 @@ const AttendancePage = () => {
       description:
         (selectedPlayer && generatePlayerDesc(selectedPlayer, true)) || "",
       prefixElement: selectedPlayer ? (
-        <Image
+        <PlayerAvatar
           boxSize="32px"
           objectFit="cover"
-          src={base64ImgSrc(selectedPlayer.avatar)}
-          alt={selectedPlayer.name}
+          avatar={selectedPlayer.avatar}
         />
       ) : (
         <Box width="32px" height="32px" bg="blackAlpha.200" />
