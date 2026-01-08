@@ -16,7 +16,7 @@ npm run tauri dev
 
 ## 版权声明
 
-版权所有 © 2024-2025 SJMCL 团队。经 SUESMC-Dev 按协议修改并分发。
+版权所有 © 2024-2026 SJMCL 团队。经 SUESMC-Dev 按协议修改并分发。
 
 > 本软件并非官方 Minecraft 服务。未获得 Mojang 或 Microsoft 批准或关联许可。
 

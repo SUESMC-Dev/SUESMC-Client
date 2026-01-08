@@ -60,7 +60,7 @@
       "settings": {
         "copyright": {
           "title": "版权",
-          "description": "版权所有 © 2024-2025 SJMCL 开发团队。经 SUESMC-Dev 按协议修改并分发。"
+          "description": "版权所有 © 2024-2026 SJMCL 开发团队。经 SUESMC-Dev 按协议修改并分发。"
         },
         "userAgreement": {
           "title": "用户协议",
@@ -1225,7 +1225,8 @@
   },
   "InstanceModsPage": {
     "modLoaderList": {
-      "title": "加载器"
+      "title": "加载器",
+      "notInstalled": "未安装"
     },
     "modList": {
       "title": "模组",
@@ -1270,6 +1271,10 @@
     }
   },
   "InstanceShaderPacksPage": {
+    "shaderLoaderList": {
+      "title": "加载器",
+      "notInstalled": "未安装"
+    },
     "shaderPackList": {
       "title": "光影包"
     }
@@ -1365,7 +1370,9 @@
     "SwitchButton": {
       "tooltip": {
         "switchPlayer": "切换角色",
-        "switchGame": "切换游戏实例"
+        "addPlayer": "添加角色",
+        "switchInstance": "切换游戏实例",
+        "addInstance": "添加游戏实例"
       }
     },
     "Text": {
@@ -1386,6 +1393,13 @@
     "toast": {
       "noSelectedPlayer": "请先添加并选择游戏角色"
     }
+  },
+  "LoaderSelector": {
+    "stable": "正式版",
+    "beta": "测试版",
+    "releaseDate": "发布于 {{date}}",
+    "notCompatibleWith": "与 {{item}} 不兼容",
+    "noVersionSelected": "未选择版本"
   },
   "ManageSkinModal": {
     "skinManage": "管理皮肤",
@@ -1427,17 +1441,6 @@
   },
   "MenuSelector": {
     "selectedCount": "已选 {{count}} 项"
-  },
-  "ModLoaderCards": {
-    "installed": "已安装",
-    "unInstalled": "未安装",
-    "notCompatibleWith": "与 {{modLoader}} 不兼容",
-    "versionNotSelected": "未选择版本"
-  },
-  "ModLoaderSelector": {
-    "stable": "正式版",
-    "beta": "测试版",
-    "releaseDate": "发布于 {{date}}"
   },
   "NotFoundPage": {
     "text": "页面不存在，即将在 {{seconds}} 秒后跳转"
@@ -2392,7 +2395,8 @@
             "INSTANCE_NOT_FOUND_BY_ID": "实例 ID 不存在",
             "INSTALLATION_DUPLICATED": "检测到另一个进程已在安装中",
             "MAIN_CLASS_NOT_FOUND": "主类未找到",
-            "PROCESSOR_EXECUTION_FAILED": "安装任务执行失败"
+            "PROCESSOR_EXECUTION_FAILED": "安装任务执行失败",
+            "LOADER_INSTALLER_NOT_FOUND": "加载器安装程序不存在"
           }
         }
       },
@@ -2552,6 +2556,12 @@
       "token": "令牌"
     },
     "helper": "请输入需同步设备生成的令牌"
+  },
+  "Tauri": {
+    "windowTitle": {
+      "gameLog": "游戏日志",
+      "gameError": "哎呀！游戏崩溃了"
+    }
   },
   "Utils": {
     "datetime": {

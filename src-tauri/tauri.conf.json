@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "SUESMC-Client",
-  "version": "0.6.5-1",
+  "version": "0.7.0",
   "identifier": "ltd.suesmc.client",
   "build": {
     "frontendDist": "../out",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "",
+        "title": " ",
         "url": "/",
         "width": 800,
         "height": 550,
@@ -53,7 +53,8 @@
         "enable": true,
         "scope": [
           "**",
-          "**/.minecraft/**"
+          "**/.*/**",
+          "**/.*/**/.*/**"
         ]
       }
     }
