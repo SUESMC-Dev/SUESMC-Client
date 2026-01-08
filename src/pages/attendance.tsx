@@ -100,17 +100,13 @@ const AttendancePage = () => {
       } else if (response.raw_error === AccountServiceError.Expired) {
         setIsExpired(true);
         setError(t("AttendancePage.error.expired"));
-        openSharedModal("relogin", {
-          player: selectedPlayer,
-          onSuccess: () => getPlayerList(true),
-        });
         setLoading(false);
       } else {
         setError(response.message);
         setLoading(false);
       }
     });
-  }, [selectedPlayer, getPlayerList, t, openSharedModal]);
+  }, [selectedPlayer, getPlayerList, t]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
