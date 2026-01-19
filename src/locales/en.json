@@ -77,9 +77,10 @@
   "AccountsPage": {
     "button": {
       "addPlayer": "Add Player",
-      "add3rdPartyServer": "Add 3rd-party Auth",
+      "add3rdPartyServer": "Add auth server",
       "sourceHomepage": "View Homepage",
-      "deleteServer": "Delete Auth Server"
+      "deleteServer": "Delete Auth Server",
+      "importFromOtherLaunchers": "Import"
     },
     "playerTypeList": {
       "all": "All Source"
@@ -925,6 +926,7 @@
     "edit": "Edit",
     "enable": "Enable",
     "finish": "Finish",
+    "import": "Import",
     "launch": "Launch",
     "next": "Next",
     "notice": "Notice",
@@ -949,12 +951,24 @@
     "viewOnWiki": "View on Minecraft Wiki"
   },
   "GeneralSettingsPage": {
-    "general": {
-      "title": "General Settings",
+    "language": {
+      "title": "Language",
       "settings": {
         "language": {
           "title": "Language",
           "communityAck": ""
+        },
+        "resourceTranslation": {
+          "title": "Resource Translation",
+          "description": "%only available in zh-Hans"
+        },
+        "translatedFilenamePrefix": {
+          "title": "Add Translation Prefix to Downloaded Resource Filenames",
+          "description": "%only available in zh-Hans"
+        },
+        "skipFirstScreenOptions": {
+          "title": "Skip First Launch Screen Options",
+          "description": "%only available in zh-Hans"
         }
       }
     },
@@ -977,14 +991,6 @@
         "launchPageQuickSwitch": {
           "title": "Quick Switch for Accounts & Instances",
           "description": "When enabled, clicking the switch button on the launch page allows direct selection of accounts and instances instead of navigating to another page."
-        },
-        "resourceTranslation": {
-          "title": "Resource Translation",
-          "description": "%only available in zh-Hans"
-        },
-        "skipFirstScreenOptions": {
-          "title": "Skip First Launch Screen Options",
-          "description": "%only available in zh-Hans"
         }
       }
     },
@@ -1173,6 +1179,22 @@
       }
     }
   },
+  "ImportAccountInfoModal": {
+    "header": {
+      "title": "Import Players and Auth Servers"
+    },
+    "launcherDesc": {
+      "HMCL": "Hello Minecraft! Launcher"
+    },
+    "body": {
+      "authServers": "Auth Servers",
+      "players": "Players"
+    },
+    "tooltips": {
+      "existingServer": "Existing auth server data with the same address will be overwritten.",
+      "existingPlayer": "Existing player data with the same UUID will be overwritten."
+    }
+  },
   "ImportModpackModal": {
     "header": {
       "title": "Import Modpack"
@@ -1185,9 +1207,6 @@
       "author": "Author",
       "modLoader": "Mod Loader",
       "gameVersion": "Game Version"
-    },
-    "button": {
-      "import": "Import"
     }
   },
   "InstanceBasicSettings": {
@@ -2076,6 +2095,20 @@
           "description": {
             "NOT_FOUND": "The authentication server does not exist"
           }
+        }
+      },
+      "retrieveOtherLauncherAccountInfo": {
+        "error": {
+          "title": "Failed to retrieve external account information",
+          "description": {
+            "NOT_FOUND": "Failed to read the external account information file."
+          }
+        }
+      },
+      "importExternalAccountInfo": {
+        "success": "External players and auth servers imported successfully",
+        "error": {
+          "title": "Failed to import external players and auth servers"
         }
       }
     },
