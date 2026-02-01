@@ -97,8 +97,7 @@
           "English",
           "SimpChinese",
           "TradChinese"
-        ],
-        "sidebarImage": "assets/misc/nsis_sidebar.bmp"
+        ]
       }
     },
     "resources": [
