@@ -94,6 +94,7 @@ const AttendancePage = () => {
     if (!selectedPlayer) {
       return;
     }
+    setLoading(true);
     AccountService.refreshPlayer(selectedPlayer.id).then((response) => {
       if (response.status === "success") {
         getPlayerList(true);
@@ -131,6 +132,7 @@ const AttendancePage = () => {
       if (response.status === "success") {
         const json: AttendanceData = response.data;
         setData(json);
+        setLoading(false);
       } else {
         if (
           response.raw_error === "EXPIRED" ||
@@ -148,7 +150,6 @@ const AttendancePage = () => {
     } catch (err) {
       setError(t("AttendancePage.error.unknown"));
       console.error(err);
-    } finally {
       setLoading(false);
     }
   }, [selectedPlayer, i18n.language, t, handleRefreshPlayer]);
