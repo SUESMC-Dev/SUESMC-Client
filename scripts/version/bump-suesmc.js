@@ -61,6 +61,7 @@ try {
 }
 
 // Sync cargo.lock with cargo.toml
+console.log("\n🔄 Syncing cargo.lock with Cargo.toml...");
 try {
   execSync("cargo update --workspace --offline", {
     stdio: "inherit",
@@ -69,5 +70,15 @@ try {
   console.log("✅ cargo.lock synced successfully!");
 } catch (error) {
   console.error("❌ Failed to sync cargo.lock:", error.message);
-  process.exit(1);
+  try {
+    console.log("🔄 Syncing cargo.lock with Cargo.toml online...");
+    execSync("cargo update --workspace", {
+      stdio: "inherit",
+      cwd: path.join(__dirname, "../../src-tauri"),
+    });
+    console.log("✅ cargo.lock synced successfully!");
+  } catch (error) {
+    console.error("❌ Failed to sync cargo.lock online:", error.message);
+    process.exit(1);
+  }
 }
