@@ -249,7 +249,6 @@ structstruck::strike! {
         pub language: String,
       },
       pub functionality: struct {
-        pub discover_page: bool,
         #[default = "instance"]
         pub instances_nav_type: String,
         #[default = true]
@@ -264,6 +263,16 @@ structstruck::strike! {
       pub advanced: struct GeneralConfigAdvanced {
         #[default = true]
         pub auto_purge_launcher_logs: bool,
+      }
+    },
+    pub intelligence: struct Intelligence {
+      pub mcp_server: struct {
+        pub launcher: struct LauncherMcpServerConfig{
+          #[default = true]
+          pub enabled: bool,
+          #[default = 18970]
+          pub port: u16,
+        },
       }
     },
     pub global_game_config: GameConfig,

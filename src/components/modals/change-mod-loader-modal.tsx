@@ -62,7 +62,7 @@ export const ChangeModLoaderModal: React.FC<ChangeModLoaderModalProps> = ({
     } else {
       setSelectedModLoader(defaultModLoaderResourceInfo);
     }
-  }, [summary?.version, defaultSelectedType]);
+  }, [modalProps.isOpen, summary?.version, defaultSelectedType]);
 
   const currentModLoader: ModLoaderResourceInfo = useMemo(() => {
     if (!summary?.modLoader)
@@ -232,9 +232,11 @@ export const ChangeModLoaderModal: React.FC<ChangeModLoaderModalProps> = ({
                 colorScheme={primaryColor}
                 onClick={handleChangeModLoader}
                 isLoading={isLoading}
-                isDisabled={isUnselected || isSameAsCurrent}
+                isDisabled={isUnselected}
               >
-                {t("General.confirm")}
+                {isSameAsCurrent
+                  ? t("ChangeModLoaderModal.footer.reinstall")
+                  : t("General.confirm")}
               </Button>
             </HStack>
           </ModalFooter>

@@ -378,7 +378,8 @@
     },
     "notSelectedLoader": "未选择新的加载器",
     "footer": {
-      "installFabricApi": "同时安装 Fabric API 模组"
+      "installFabricApi": "同时安装 Fabric API 模组",
+      "reinstall": "重新安装"
     }
   },
   "CheckModUpdateModal": {
@@ -487,11 +488,30 @@
   "DevToolbar": {
     "tooltip": "开发工具栏"
   },
-  "DiscoverPage": {
+  "DiscoverCommunityNewsPage": {
     "title": "发现",
     "noMore": "无更多内容",
     "sources": "管理数据源",
     "NoSources": "未添加数据源"
+  },
+  "DiscoverHomePage": {
+    "minecraft-news": "Minecraft 新闻",
+    "community-news": "社区新闻",
+    "hotModpacks": "{{source}} 的热门整合包"
+  },
+  "DiscoverLayout": {
+    "discoverDomainList": {
+      "search": "搜索",
+      "home": "主页",
+      "community-news": "社区新闻",
+      "minecraft-news": "Minecraft 新闻",
+      "modpack": "整合包",
+      "mod": "模组",
+      "world": "世界",
+      "resourcepack": "资源包",
+      "shader": "光影",
+      "datapack": "数据包"
+    }
   },
   "DiscoverSourcesPage": {
     "button": {
@@ -711,9 +731,19 @@
       "macos": "Control(⌃)",
       "windows": "Ctrl"
     },
+    "ctrlKeyShort": {
+      "linux": "Ctrl",
+      "macos": "⌃",
+      "windows": "Ctrl"
+    },
     "metaKey": {
       "linux": "Meta",
       "macos": "Command(⌘)",
+      "windows": "Win"
+    },
+    "metaKeyShort": {
+      "linux": "Meta",
+      "macos": "⌘",
       "windows": "Win"
     },
     "playerTypes": {
@@ -933,6 +963,7 @@
     "finish": "完成",
     "import": "导入",
     "launch": "启动",
+    "more": "更多",
     "next": "下一步",
     "notice": "提示",
     "open": "打开",
@@ -980,12 +1011,6 @@
     "functions": {
       "title": "功能",
       "settings": {
-        "discoverPage": {
-          "title": "发现页",
-          "openNotice": {
-            "content": "顶部导航栏的 “搜索” 已替换为 “发现”，您可以通过键盘快捷键 <key>{{keyname}}</key> + <key>S</key> 继续使用 “聚合搜索”。"
-          }
-        },
         "instancesNavType": {
           "title": "实例页导航栏模式",
           "description": "更改实例页左侧导航栏是否显示、分组方式",
@@ -1124,6 +1149,10 @@
       "content": "在此处添加账户，选择您想要游玩的角色"
     },
     "step3": {
+      "title": "发现页",
+      "content": "在此处浏览 Minecraft 与社区新闻，发现并下载各类相关资源，如模组、地图、整合包等。<br/>另外，您也可以通过键盘快捷键 <key>{{keyname}}</key> + <key>S</key> 快速打开 “聚合搜索”。"
+    },
+    "step4": {
       "title": "Minecraft，启动！",
       "content": "选中实例与角色、调整好相关设置后，点击启动按钮享受游戏吧 🥳"
     }
@@ -1364,6 +1393,29 @@
       "launch": "游玩此服务器"
     }
   },
+  "IntelligenceSettingsPage": {
+    "title": "SJMCL 智能",
+    "description": "将人工智能模型整合进您的启动器使用与 Minecraft 游玩体验",
+    "mcpServer": {
+      "title": "MCP 服务",
+      "headExtra": "以下设置重启后生效",
+      "settings": {
+        "enabled": {
+          "title": "启动器 MCP 服务",
+          "description": "启用本地 MCP 服务，以连接外部 Agent 应用实现启动器的自动化控制"
+        },
+        "docs": {
+          "title": "使用指南",
+          "description": "了解如何将启动器连接到外部 Agent 应用（如 Claude, Cherry Studio 等）",
+          "url": "https://mc.sjtu.cn/sjmcl/zh/docs/intelligence/launcher-mcp"
+        },
+        "port": {
+          "title": "端口",
+          "description": "启动器 MCP 服务使用的固定本地端口"
+        }
+      }
+    }
+  },
   "JavaSettingsPage": {
     "javaList": {
       "title": "Java 管理",
@@ -1466,6 +1518,10 @@
   },
   "MenuSelector": {
     "selectedCount": "已选 {{count}} 项"
+  },
+  "NoSuitableJavaDialog": {
+    "title": "未找到合适的 Java 运行时",
+    "body": "对于当前实例，没有合适的 Java 运行时可供选择。点击 “确定” 以前往 Java 管理页面手动添加或下载 Java。"
   },
   "NotFoundPage": {
     "text": "页面不存在，即将在 {{seconds}} 秒后跳转"
@@ -2526,6 +2582,7 @@
       "general": "通用",
       "appearance": "外观",
       "download": "下载资源",
+      "intelligence": "智能",
       "sync-restore": "同步与还原",
       "help": "文档与帮助",
       "about": "关于",

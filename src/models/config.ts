@@ -116,7 +116,6 @@ export interface LauncherConfig {
       language: string;
     };
     functionality: {
-      discoverPage: boolean;
       instancesNavType: string;
       launchPageQuickSwitch: boolean;
       resourceTranslation: boolean;
@@ -125,6 +124,14 @@ export interface LauncherConfig {
     };
     advanced: {
       autoPurgeLauncherLogs: boolean;
+    };
+  };
+  intelligence: {
+    mcpServer: {
+      launcher: {
+        enabled: boolean;
+        port: number;
+      };
     };
   };
   localGameDirectories: GameDirectory[];
@@ -275,7 +282,6 @@ export const defaultConfig: LauncherConfig = {
       language: "zh-Hans",
     },
     functionality: {
-      discoverPage: false,
       instancesNavType: "instance",
       launchPageQuickSwitch: true,
       resourceTranslation: true,
@@ -284,6 +290,14 @@ export const defaultConfig: LauncherConfig = {
     },
     advanced: {
       autoPurgeLauncherLogs: true,
+    },
+  },
+  intelligence: {
+    mcpServer: {
+      launcher: {
+        enabled: true,
+        port: 18970,
+      },
     },
   },
   localGameDirectories: [{ name: "Current", dir: ".minecraft/" }],

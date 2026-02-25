@@ -30,9 +30,9 @@ import { useLauncherConfig } from "@/contexts/config";
 import { useGlobalData } from "@/contexts/global-data";
 import { useSharedModals } from "@/contexts/shared-modal";
 import { PlayerType } from "@/enums/account";
-import { useThemedCSSStyle } from "@/hooks/themed-css";
 import { Player } from "@/models/account";
 import { InstanceSummary } from "@/models/instance/misc";
+import cardStyles from "@/styles/card.module.css";
 import styles from "@/styles/launch.module.css";
 
 interface CustomButtonProps extends Omit<IconButtonProps, "onClick"> {
@@ -107,7 +107,6 @@ const ButtonWithPopover: React.FC<CustomButtonProps> = ({
 const LaunchPage = () => {
   const { t } = useTranslation();
   const router = useRouter();
-  const themedStyles = useThemedCSSStyle();
   const { openSharedModal } = useSharedModals();
 
   const { selectedPlayer, getPlayerList, getInstanceList, selectedInstance } =
@@ -131,9 +130,7 @@ const LaunchPage = () => {
     <HStack position="absolute" bottom={7} right={7} spacing={4}>
       <AttendanceCard />
       <Card
-        className={
-          styles["selected-user-card"] + " " + themedStyles.card["card-back"]
-        }
+        className={styles["selected-user-card"] + " " + cardStyles["card-back"]}
       >
         <Box position="absolute" top={1} right={1}>
           <ButtonWithPopover

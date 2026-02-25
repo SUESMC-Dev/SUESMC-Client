@@ -378,7 +378,8 @@
     },
     "notSelectedLoader": "No new loader selected",
     "footer": {
-      "installFabricApi": "Install Fabric API Mod"
+      "installFabricApi": "Install Fabric API Mod",
+      "reinstall": "Reinstall"
     }
   },
   "CheckModUpdateModal": {
@@ -487,11 +488,30 @@
   "DevToolbar": {
     "tooltip": "Dev Toolbar"
   },
-  "DiscoverPage": {
+  "DiscoverCommunityNewsPage": {
     "title": "Discover",
     "noMore": "No more",
     "sources": "Manage Sources",
     "NoSources": "No source added"
+  },
+  "DiscoverHomePage": {
+    "minecraft-news": "Minecraft News",
+    "community-news": "Community News",
+    "hotModpacks": "Hot Modpacks from {{source}}"
+  },
+  "DiscoverLayout": {
+    "discoverDomainList": {
+      "search": "Search",
+      "home": "Home",
+      "community-news": "Community",
+      "minecraft-news": "Minecraft News",
+      "modpack": "Modpacks",
+      "mod": "Mods",
+      "world": "Worlds",
+      "resourcepack": "Resource Packs",
+      "shader": "Shader Packs",
+      "datapack": "Data Packs"
+    }
   },
   "DiscoverSourcesPage": {
     "button": {
@@ -528,9 +548,9 @@
     "resourceTypeList": {
       "world": "Worlds",
       "mod": "Mods",
-      "resourcepack": "Resourcepacks",
-      "shader": "Shaderpacks",
-      "datapack": "Datapacks"
+      "resourcepack": "Resource Packs",
+      "shader": "Shader Packs",
+      "datapack": "Data Packs"
     }
   },
   "DownloadSettingPage": {
@@ -711,9 +731,19 @@
       "macos": "Control(⌃)",
       "windows": "Ctrl"
     },
+    "ctrlKeyShort": {
+      "linux": "Ctrl",
+      "macos": "⌃",
+      "windows": "Ctrl"
+    },
     "metaKey": {
       "linux": "Meta",
       "macos": "Command(⌘)",
+      "windows": "Win"
+    },
+    "metaKeyShort": {
+      "linux": "Meta",
+      "macos": "⌘",
       "windows": "Win"
     },
     "playerTypes": {
@@ -933,6 +963,7 @@
     "finish": "Finish",
     "import": "Import",
     "launch": "Launch",
+    "more": "More",
     "next": "Next",
     "notice": "Notice",
     "open": "Open",
@@ -980,12 +1011,6 @@
     "functions": {
       "title": "Functionality",
       "settings": {
-        "discoverPage": {
-          "title": "Discover Page",
-          "openNotice": {
-            "content": "The 'Search' in the top navigation bar has been replaced with 'Discover'. You can continue using the 'Global Search' through the keyboard shortcut <key>{{keyname}}</key> + <key>S</key>."
-          }
-        },
         "instancesNavType": {
           "title": "Instance Page Navigation Mode",
           "description": "Change whether the instance page's left navigation bar is displayed and its grouping method.",
@@ -1124,6 +1149,10 @@
       "content": "Here you can add accounts and choose the player you want to play."
     },
     "step3": {
+      "title": "Discover Page",
+      "content": "Here you can browse Minecraft and community news, discover and download various related resources such as mods, maps, and modpacks.<br/>You can also quickly open \"Global Search\" with the keyboard shortcut <key>{{keyname}}</key> + <key>S</key>."
+    },
+    "step4": {
       "title": "Launch Minecraft!",
       "content": "After selecting your instance and player and adjusting the relevant settings, click the launch button and enjoy the game! 🥳"
     }
@@ -1364,6 +1393,29 @@
       "launch": "Play this Server"
     }
   },
+  "IntelligenceSettingsPage": {
+    "title": "SJMCL Intelligence",
+    "description": "Integrate AI models into your launcher and Minecraft gameplay experience.",
+    "mcpServer": {
+      "title": "MCP Service",
+      "headExtra": "Restart Required",
+      "settings": {
+        "enabled": {
+          "title": "Launcher MCP Service",
+          "description": "Enable the local MCP service to connect external agent applications for automated launcher control."
+        },
+        "docs": {
+          "title": "User Guide",
+          "description": "Learn how to connect the launcher to external agent applications (such as Claude, Cherry Studio, and more).",
+          "url": "https://mc.sjtu.cn/sjmcl/en/docs/intelligence/launcher-mcp"
+        },
+        "port": {
+          "title": "Port",
+          "description": "The fixed local port used by the launcher MCP service."
+        }
+      }
+    }
+  },
   "JavaSettingsPage": {
     "javaList": {
       "title": "Java Management",
@@ -1466,6 +1518,10 @@
   },
   "MenuSelector": {
     "selectedCount": "{{count}} selected"
+  },
+  "NoSuitableJavaDialog": {
+    "title": "No suitable Java runtime found for this instance",
+    "body": "No suitable Java runtime is available for this instance. Click \"Confirm\" to open Java Management page and add or download Java manually."
   },
   "NotFoundPage": {
     "text": "Page not found, redirecting to launch page in {{seconds}} seconds..."
@@ -2526,6 +2582,7 @@
       "general": "General",
       "appearance": "Appearance",
       "download": "Download",
+      "intelligence": "Intelligence",
       "sync-restore": "Sync & Restore",
       "help": "Docs & Help",
       "about": "About",

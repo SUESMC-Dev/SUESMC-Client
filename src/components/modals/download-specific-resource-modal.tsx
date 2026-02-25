@@ -46,7 +46,6 @@ import { useToast } from "@/contexts/toast";
 import { InstanceSubdirType, ModLoaderType } from "@/enums/instance";
 import { OtherResourceSource, OtherResourceType } from "@/enums/resource";
 import { GetStateFlag } from "@/hooks/get-state";
-import { useThemedCSSStyle } from "@/hooks/themed-css";
 import {
   GameClientResourceInfo,
   OtherResourceFileInfo,
@@ -57,6 +56,7 @@ import { TaskParam, TaskTypeEnums } from "@/models/task";
 import { InstanceService } from "@/services/instance";
 import { ResourceService } from "@/services/resource";
 import { TaskService } from "@/services/task";
+import cardStyles from "@/styles/card.module.css";
 import { ISOToDate } from "@/utils/datetime";
 import { translateTag } from "@/utils/resource";
 import { formatDisplayCount, sanitizeFileName } from "@/utils/string";
@@ -82,7 +82,6 @@ const DownloadSpecificResourceModal: React.FC<
   const { config } = useLauncherConfig();
   const router = useRouter();
   const toast = useToast();
-  const themedStyles = useThemedCSSStyle();
   const primaryColor = config.appearance.theme.primaryColor;
   const showZhTrans =
     config.general.general.language === "zh-Hans" &&
@@ -514,7 +513,7 @@ const DownloadSpecificResourceModal: React.FC<
         <ModalCloseButton />
         <ModalBody>
           <Card
-            className={themedStyles.card["card-front"]}
+            className={cardStyles["card-front"]}
             mt={-2}
             mb={2}
             py={2}
@@ -618,8 +617,8 @@ const DownloadSpecificResourceModal: React.FC<
               <MCVersionNumberHelper placement="bottom-start" />
               <IconButton
                 aria-label="refresh-version-packs"
-                icon={<LuRefreshCw />}
-                size="sm"
+                icon={<LuRefreshCw size={14} />}
+                size="xs"
                 variant="ghost"
                 onClick={() => {
                   fetchVersionLabels();
