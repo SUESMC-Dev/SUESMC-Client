@@ -4,16 +4,15 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useGlobalData } from "@/contexts/global-data";
 import { PlayerType } from "@/enums/account";
-import { useThemedCSSStyle } from "@/hooks/themed-css";
 import { AttendanceData } from "@/models/attendance";
 import { AccountService } from "@/services/account";
+import cardStyles from "@/styles/card.module.css";
 import styles from "@/styles/launch.module.css";
 
 export const AttendanceCard = () => {
   const { t, i18n } = useTranslation();
   const { selectedPlayer } = useGlobalData();
   const router = useRouter();
-  const themedStyles = useThemedCSSStyle();
   const [attendanceTime, setAttendanceTime] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -58,9 +57,7 @@ export const AttendanceCard = () => {
   if (!visible) return null;
   return (
     <Card
-      className={
-        styles["selected-user-card"] + " " + themedStyles.card["card-back"]
-      }
+      className={styles["selected-user-card"] + " " + cardStyles["card-back"]}
       cursor="pointer"
       onClick={() => router.push("/attendance")}
       sx={{
