@@ -1,6 +1,6 @@
 [package]
 name = "SUESMC-Client"
-version = "1.0.0-beta.2-1"
+version = "1.0.0-beta.2-2"
 description = "A Minecraft launcher from SJMC, modified by SUESMC-Dev"
 authors = ["SJMCL Team", "SUESMC-dev"]
 license = "GNU General Public License v3.0 (with additional terms)"
