@@ -923,7 +923,7 @@ pub fn create_launch_desktop_shortcut(
     .append_pair("id", &instance.id)
     .finish()
     .replace("+", "%20");
-  let url = format!("sjmcl://launch?{}", encoded_id);
+  let url = format!("suesmcclient://launch?{}", encoded_id);
 
   #[cfg(any(target_os = "windows", target_os = "linux"))]
   let icon_path = {

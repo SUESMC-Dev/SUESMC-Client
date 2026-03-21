@@ -3,6 +3,7 @@ import micromatch from "micromatch";
 import { useEffect, useRef } from "react";
 
 const SJMCL_LINK_PREFIX = "sjmcl://";
+const SUESMC_CLIENT_LINK_PREFIX = "suesmcclient://";
 const EMIT_DEEPLINK_EVENT = "deeplink:emit";
 
 type TriggerRule = string | string[] | RegExp | ((subpath: string) => boolean);
@@ -42,6 +43,11 @@ export const useDeepLink = ({ trigger, onCall }: UseDeepLinkOptions) => {
       urls.forEach((url) => {
         if (url.startsWith(SJMCL_LINK_PREFIX)) {
           const subpath = url.slice(SJMCL_LINK_PREFIX.length);
+          if (matchSubpath(subpath, trigger)) {
+            onCall(url, subpath);
+          }
+        } else if (url.startsWith(SUESMC_CLIENT_LINK_PREFIX)) {
+          const subpath = url.slice(SUESMC_CLIENT_LINK_PREFIX.length);
           if (matchSubpath(subpath, trigger)) {
             onCall(url, subpath);
           }

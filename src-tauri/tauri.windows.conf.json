@@ -1,5 +1,5 @@
 {
-  "identifier": "SJMCL",
+  "identifier": "SUESMC-Client",
   "bundle": {
     "windows": {
       "nsis": {

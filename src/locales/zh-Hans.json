@@ -1227,7 +1227,7 @@
           "url": "https://mc.sjtu.cn/sjmcl/docs"
         },
         "UserGroup": {
-          "title": "用户社群",
+          "title": "SJMC Launcher 用户社群",
           "description": "欢迎加入 QQ 群或 Discord 服务器，报告问题、请求功能或获取帮助",
           "url": "https://mc.sjtu.cn/sjmcl/docs/user-group"
         }
@@ -1487,7 +1487,7 @@
   "LastExitedAbnormallyDialog": {
     "dialog": {
       "title": "上次运行异常退出",
-      "content": "SJMCL 上次运行时异常退出。您可以将日志发送到<community>用户社群</community>，或在 <github>GitHub</github> 发起 Issue 以寻求帮助",
+      "content": "SUESMC 客户端上次运行时异常退出。如果使用原版 SJMC Launcher 时也遇到相同问题，您可以将日志发送到 SJMCL <community>用户社群</community>，或在 <github>GitHub</github> 发起 Issue 以寻求帮助",
       "viewLog": "查看日志"
     }
   },

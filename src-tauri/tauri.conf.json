@@ -56,6 +56,7 @@
     "deep-link": {
       "desktop": {
         "schemes": [
+          "suesmcclient",
           "sjmcl"
         ]
       }
