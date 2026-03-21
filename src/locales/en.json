@@ -21,9 +21,8 @@
         "contributors": {
           "title": "Contributors of SJMC Launcher"
         },
-        "reportIssue": {
-          "title": "Report an Issue or Submit a Feature Request to SJMC Launcher",
-          "description": "If your issue or request is also applicable to SJMC Launcher"
+        "sourceCode": {
+          "title": "View Source Code on GitHub"
         },
         "aboutSJMC": {
           "title": "About SJTU Minecraft Club (SJMC)"
@@ -634,7 +633,7 @@
       "pause": "Pause",
       "begin": "Start",
       "retry": "Retry",
-      "deleteRecord": "Delete this Record"
+      "clearHistory": "Clear History Records"
     },
     "label": {
       "paused": "Paused",
@@ -964,6 +963,7 @@
     "import": "Import",
     "launch": "Launch",
     "more": "More",
+    "new": "New",
     "next": "Next",
     "notice": "Notice",
     "open": "Open",
@@ -1016,11 +1016,22 @@
           "description": "Change whether the instance page's left navigation bar is displayed and its grouping method.",
           "instance": "By Instance",
           "directory": "By Directory",
+          "tag": "By Tag",
           "hidden": "Hidden"
         },
         "launchPageQuickSwitch": {
           "title": "Quick Switch for Accounts & Instances",
           "description": "When enabled, clicking the switch button on the launch page allows direct selection of accounts and instances instead of navigating to another page."
+        }
+      }
+    },
+    "sync": {
+      "title": "Sync",
+      "settings": {
+        "internetSync": {
+          "title": "Sync Launcher Settings via Internet",
+          "import": "Import",
+          "export": "Export"
         }
       }
     },
@@ -1037,6 +1048,11 @@
         "autoPurgeLauncherLogs": {
           "title": "Auto Purge Launcher Logs",
           "description": "Automatically purge launcher log files older than 30 days"
+        },
+        "restoreAll": {
+          "title": "Restore All Settings",
+          "description": "Restore all launcher settings to their default values",
+          "restore": "Restore"
         }
       }
     }
@@ -1209,6 +1225,11 @@
         "LauncherDocs": {
           "title": "SJMC Launcher Documentation",
           "url": "https://mc.sjtu.cn/sjmcl/en/docs"
+        },
+        "UserGroup": {
+          "title": "User Community",
+          "description": "Join the QQ group or Discord server to report issues, request features, or get help",
+          "url": "https://mc.sjtu.cn/sjmcl/en/docs/user-group"
         }
       }
     }
@@ -1218,11 +1239,15 @@
       "title": "Import Players and Auth Servers"
     },
     "launcherDesc": {
-      "HMCL": "Hello Minecraft! Launcher"
+      "HMCL": "Hello Minecraft! Launcher",
+      "MultiMC": "MultiMC"
     },
     "body": {
       "authServers": "Auth Servers",
       "players": "Players"
+    },
+    "footer": {
+      "parentDirHint": "Account files will be searched in parent path of added game directories."
     },
     "tooltips": {
       "existingServer": "Existing auth server data with the same address will be overwritten.",
@@ -1280,7 +1305,8 @@
   "InstanceModsPage": {
     "modLoaderList": {
       "title": "Mod Loader",
-      "notInstalled": "Not Installed"
+      "notInstalled": "Not Installed",
+      "installed": "Installed"
     },
     "modList": {
       "title": "Mods",
@@ -1310,6 +1336,7 @@
   "InstanceSettingsPage": {
     "name": "Instance Name",
     "description": "Instance Description",
+    "colorTag": "Color Tag",
     "icon": "Instance Icon",
     "applySettings": "Apply the following specific settings",
     "restoreSettings": "Restore specific settings",
@@ -1457,6 +1484,13 @@
       "noSelectedGame": "No game instance selected"
     }
   },
+  "LastExitedAbnormallyDialog": {
+    "dialog": {
+      "title": "Previous Run Exited Abnormally",
+      "content": "SJMCL exited abnormally during the last run. You can send the logs to the <community>community</community>, or open an issue on <github>GitHub</github> for help.",
+      "viewLog": "View Logs"
+    }
+  },
   "LaunchProcessModal": {
     "header": {
       "title": "Launch Game - {{name}}"
@@ -1468,7 +1502,8 @@
       "launchGame": "Waiting for Game to Launch"
     },
     "toast": {
-      "noSelectedPlayer": "Please add and select a player first"
+      "noSelectedPlayer": "Please add and select a player first",
+      "noSelectedInstance": "Please add and select a game instance first"
     }
   },
   "LoaderSelector": {
@@ -1887,9 +1922,17 @@
       "setAsBg": "Set as Launcher Background"
     }
   },
+  "SelectInstanceModal": {
+    "header": {
+      "title": "Select Instance",
+      "titleForLaunch": "Select Instance to Launch"
+    }
+  },
   "SelectPlayerModal": {
     "header": {
-      "title": "Please select a player to add"
+      "title": "Select Player",
+      "titleForAdd": "Select New Player to Add",
+      "titleForLaunch": "Select Player to Play"
     }
   },
   "Services": {
@@ -2583,7 +2626,6 @@
       "appearance": "Appearance",
       "download": "Download",
       "intelligence": "Intelligence",
-      "sync-restore": "Sync & Restore",
       "help": "Docs & Help",
       "about": "About",
       "dev-test": "Dev - Test Page"
@@ -2640,23 +2682,6 @@
     "button": {
       "later": "Later",
       "starUs": "Star Us"
-    }
-  },
-  "SyncAndRestoreSettingsPage": {
-    "launcherConfig": {
-      "title": "Launcher Settings",
-      "settings": {
-        "internetSync": {
-          "title": "Sync through the Internet",
-          "import": "Import",
-          "export": "Export"
-        },
-        "restoreAll": {
-          "title": "Restore All Settings",
-          "description": "Restore all launcher settings to their default values",
-          "restore": "Restore"
-        }
-      }
     }
   },
   "SyncConfigExportModal": {

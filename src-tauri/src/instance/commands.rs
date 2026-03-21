@@ -16,8 +16,10 @@ use crate::instance::helpers::modpack::misc::{
   extract_overrides, get_download_params, ModpackMetaInfo,
 };
 use crate::instance::helpers::mods::common::{
-  add_local_mod_translations, compress_icon, get_mod_info_from_dir, get_mod_info_from_jar,
-  LocalModTranslationEntry, LocalModTranslationsCache,
+  compress_icon, get_mod_info_from_dir, get_mod_info_from_jar,
+};
+use crate::instance::helpers::mods::translation::{
+  add_local_mod_translations, LocalModTranslationEntry, LocalModTranslationsCache,
 };
 use crate::instance::helpers::options_txt::get_zh_hans_lang_tag;
 use crate::instance::helpers::resourcepack::{
@@ -156,6 +158,11 @@ pub async fn update_instance_config(
     // PartialUpdate not support Option<T> yet
     if key_path == "description" {
       instance.description = serde_json::from_str::<String>(&value).unwrap_or(value);
+    } else if key_path == "tag" {
+      instance.tag = serde_json::from_str::<Option<String>>(&value)
+        .ok()
+        .flatten()
+        .map(|v| v.trim().to_string());
     } else if key_path == "icon_src" {
       instance.icon_src = serde_json::from_str::<String>(&value).unwrap_or(value);
     } else if key_path == "starred" {
@@ -496,6 +503,20 @@ pub async fn retrieve_local_mod_list(
   app: AppHandle,
   instance_id: String,
 ) -> SJMCLResult<Vec<LocalModInfo>> {
+  let expected_loader_type = {
+    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+    let state = binding.lock().unwrap();
+    let instance = state
+      .get(&instance_id)
+      .ok_or(InstanceError::InstanceNotFoundByID)?;
+
+    if instance.mod_loader.loader_type != ModLoaderType::Unknown {
+      Some(instance.mod_loader.loader_type)
+    } else {
+      None
+    }
+  };
+
   let mods_dir = match get_instance_subdir_path_by_id(&app, &instance_id, &InstanceSubdirType::Mods)
   {
     Some(path) => path,
@@ -519,8 +540,10 @@ pub async fn retrieve_local_mod_list(
       .await
       .map_err(|_| InstanceError::SemaphoreAcquireFailed)?;
     let task = tokio::spawn(async move {
-      log::debug!("Load mod info from dir: {}", path.display());
-      let info = get_mod_info_from_jar(&path).await.ok();
+      log::debug!("Load mod info from jar: {}", path.display());
+      let info = get_mod_info_from_jar(&path, expected_loader_type)
+        .await
+        .ok();
       drop(permit);
       info
     });
@@ -538,7 +561,9 @@ pub async fn retrieve_local_mod_list(
         .map_err(|_| InstanceError::SemaphoreAcquireFailed)?;
       let task = tokio::spawn(async move {
         log::debug!("Load mod info from dir: {}", path.display());
-        let info = get_mod_info_from_dir(&path).await.ok();
+        let info = get_mod_info_from_dir(&path, expected_loader_type)
+          .await
+          .ok();
         drop(permit);
         info
       });
@@ -553,22 +578,8 @@ pub async fn retrieve_local_mod_list(
   }
 
   // check potential incompatibility
-  let incompatible_loader_type = {
-    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
-    let state = binding.lock().unwrap();
-    let instance = state
-      .get(&instance_id)
-      .ok_or(InstanceError::InstanceNotFoundByID)?;
-
-    if instance.mod_loader.loader_type != ModLoaderType::Unknown {
-      Some(instance.mod_loader.loader_type.clone())
-    } else {
-      None
-    }
-  };
-
   mod_infos.iter_mut().for_each(|mod_info| {
-    if let Some(loader_type) = &incompatible_loader_type {
+    if let Some(loader_type) = &expected_loader_type {
       mod_info.potential_incompatibility = mod_info.loader_type != *loader_type;
     } else {
       mod_info.potential_incompatibility = false;
@@ -894,7 +905,11 @@ pub async fn retrieve_world_details(
 }
 
 #[tauri::command]
-pub fn create_launch_desktop_shortcut(app: AppHandle, instance_id: String) -> SJMCLResult<()> {
+pub fn create_launch_desktop_shortcut(
+  app: AppHandle,
+  instance_id: String,
+  icon_src: String,
+) -> SJMCLResult<()> {
   let binding = app.state::<Mutex<HashMap<String, Instance>>>();
   let state = binding
     .lock()
@@ -910,7 +925,19 @@ pub fn create_launch_desktop_shortcut(app: AppHandle, instance_id: String) -> SJ
     .replace("+", "%20");
   let url = format!("sjmcl://launch?{}", encoded_id);
 
-  create_url_shortcut(&app, name, url, None).map_err(|_| InstanceError::ShortcutCreationFailed)?;
+  #[cfg(any(target_os = "windows", target_os = "linux"))]
+  let icon_path = {
+    use crate::instance::helpers::misc::create_instance_shortcut_icon;
+    create_instance_shortcut_icon(&app, instance, &icon_src).ok()
+  };
+  #[cfg(target_os = "macos")]
+  let icon_path = {
+    let _ = icon_src; // explicitly consume to avoid warning
+    None
+  };
+
+  create_url_shortcut(&app, name, url, icon_path)
+    .map_err(|_| InstanceError::ShortcutCreationFailed)?;
 
   Ok(())
 }
@@ -954,10 +981,10 @@ pub async fn create_instance(
     version: game.id.clone(),
     version_path: version_path.clone(),
     mod_loader: ModLoader {
-      loader_type: mod_loader.loader_type.clone(),
+      loader_type: mod_loader.loader_type,
       status: if matches!(
         mod_loader.loader_type,
-        ModLoaderType::Unknown | ModLoaderType::Fabric
+        ModLoaderType::Unknown | ModLoaderType::Fabric | ModLoaderType::Quilt
       ) {
         ModLoaderStatus::Installed
       } else {
@@ -968,6 +995,7 @@ pub async fn create_instance(
     },
     optifine: optifine_info,
     description,
+    tag: None,
     icon_src,
     starred: false,
     play_time: 0,
@@ -1268,7 +1296,7 @@ pub async fn change_mod_loader(
     .ok_or(InstanceError::NotSupportChangeModLoader)?;
 
   let mod_loader = ModLoader {
-    loader_type: new_mod_loader.loader_type.clone(),
+    loader_type: new_mod_loader.loader_type,
     version: new_mod_loader.version.clone(),
     status: if matches!(
       new_mod_loader.loader_type,

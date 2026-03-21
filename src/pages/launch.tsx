@@ -245,6 +245,7 @@ const LaunchPage = () => {
               popoverContent={
                 <InstancesView
                   instances={instanceList}
+                  selectedInstance={selectedInstance}
                   viewType="list"
                   withMenu={false}
                 />

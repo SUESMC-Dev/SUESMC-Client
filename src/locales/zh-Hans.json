@@ -21,9 +21,8 @@
         "contributors": {
           "title": "SJMC Launcher 的开发者名单"
         },
-        "reportIssue": {
-          "title": "向 SJMC Launcher 报告问题或请求功能",
-          "description": "如果你的问题或请求也适用于 SJMC Launcher"
+        "sourceCode": {
+          "title": "在 GitHub 查看源代码"
         },
         "aboutSJMC": {
           "title": "关于上海交通大学 Minecraft 社（SJMC）"
@@ -65,7 +64,7 @@
         "userAgreement": {
           "title": "用户协议",
           "description": "使用本修改版本需要遵守 SJMC Launcher 用户协议",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs/tos"
+          "url": "https://mc.sjtu.cn/sjmcl/docs/tos"
         },
         "openSourceLicense": {
           "title": "开源协议",
@@ -634,7 +633,7 @@
       "pause": "暂停",
       "begin": "开始",
       "retry": "重试",
-      "deleteRecord": "删除此记录"
+      "clearHistory": "清空历史记录"
     },
     "label": {
       "paused": "已暂停",
@@ -964,6 +963,7 @@
     "import": "导入",
     "launch": "启动",
     "more": "更多",
+    "new": "新",
     "next": "下一步",
     "notice": "提示",
     "open": "打开",
@@ -1016,11 +1016,22 @@
           "description": "更改实例页左侧导航栏是否显示、分组方式",
           "instance": "按实例",
           "directory": "按目录",
+          "tag": "按标签",
           "hidden": "隐藏"
         },
         "launchPageQuickSwitch": {
           "title": "快捷切换实例与账户",
           "description": "启用后，点击启动页的切换按钮可直接选择账户或实例，而无需跳转页面"
+        }
+      }
+    },
+    "sync": {
+      "title": "同步",
+      "settings": {
+        "internetSync": {
+          "title": "联网同步启动器设置",
+          "import": "导入",
+          "export": "导出"
         }
       }
     },
@@ -1037,6 +1048,11 @@
         "autoPurgeLauncherLogs": {
           "title": "自动清理启动器日志",
           "description": "自动清理 30 天及以前的启动器日志文件"
+        },
+        "restoreAll": {
+          "title": "还原所有设置",
+          "description": "将所有启动器设置还原为默认值",
+          "restore": "还原"
         }
       }
     }
@@ -1208,7 +1224,12 @@
       "settings": {
         "LauncherDocs": {
           "title": "SJMC Launcher 文档",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs"
+          "url": "https://mc.sjtu.cn/sjmcl/docs"
+        },
+        "UserGroup": {
+          "title": "用户社群",
+          "description": "欢迎加入 QQ 群或 Discord 服务器，报告问题、请求功能或获取帮助",
+          "url": "https://mc.sjtu.cn/sjmcl/docs/user-group"
         }
       }
     }
@@ -1218,11 +1239,15 @@
       "title": "从其他启动器导入账户信息"
     },
     "launcherDesc": {
-      "HMCL": "Hello Minecraft! Launcher"
+      "HMCL": "Hello Minecraft! Launcher",
+      "MultiMC": "MultiMC"
     },
     "body": {
       "authServers": "认证服务器",
       "players": "角色"
+    },
+    "footer": {
+      "parentDirHint": "将在已添加游戏目录的父目录寻找账户信息文件。"
     },
     "tooltips": {
       "existingServer": "已存在相同地址的认证服务器，导入将会覆盖数据",
@@ -1280,7 +1305,8 @@
   "InstanceModsPage": {
     "modLoaderList": {
       "title": "加载器",
-      "notInstalled": "未安装"
+      "notInstalled": "未安装",
+      "installed": "已安装"
     },
     "modList": {
       "title": "模组",
@@ -1310,6 +1336,7 @@
   "InstanceSettingsPage": {
     "name": "实例名称",
     "description": "实例描述",
+    "colorTag": "颜色标签",
     "icon": "实例图标",
     "applySettings": "启用特定游戏设置",
     "restoreSettings": "重置以下特定设置",
@@ -1407,7 +1434,7 @@
         "docs": {
           "title": "使用指南",
           "description": "了解如何将启动器连接到外部 Agent 应用（如 Claude, Cherry Studio 等）",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs/intelligence/launcher-mcp"
+          "url": "https://mc.sjtu.cn/sjmcl/docs/intelligence/launcher-mcp"
         },
         "port": {
           "title": "端口",
@@ -1457,6 +1484,13 @@
       "noSelectedGame": "尚未选择游戏实例"
     }
   },
+  "LastExitedAbnormallyDialog": {
+    "dialog": {
+      "title": "上次运行异常退出",
+      "content": "SJMCL 上次运行时异常退出。您可以将日志发送到<community>用户社群</community>，或在 <github>GitHub</github> 发起 Issue 以寻求帮助",
+      "viewLog": "查看日志"
+    }
+  },
   "LaunchProcessModal": {
     "header": {
       "title": "启动游戏 - {{name}}"
@@ -1468,7 +1502,8 @@
       "launchGame": "等待游戏启动"
     },
     "toast": {
-      "noSelectedPlayer": "请先添加并选择游戏角色"
+      "noSelectedPlayer": "请先添加并选择游戏角色",
+      "noSelectedInstance": "请先添加并选择游戏实例"
     }
   },
   "LoaderSelector": {
@@ -1887,9 +1922,17 @@
       "setAsBg": "设置为启动器背景"
     }
   },
+  "SelectInstanceModal": {
+    "header": {
+      "title": "选择实例",
+      "titleForLaunch": "选择要启动的实例"
+    }
+  },
   "SelectPlayerModal": {
     "header": {
-      "title": "请选择想要添加的角色"
+      "title": "选择角色",
+      "titleForAdd": "选择要添加的新角色",
+      "titleForLaunch": "选择要游玩的角色"
     }
   },
   "Services": {
@@ -2583,7 +2626,6 @@
       "appearance": "外观",
       "download": "下载资源",
       "intelligence": "智能",
-      "sync-restore": "同步与还原",
       "help": "文档与帮助",
       "about": "关于",
       "dev-test": "开发 - 测试页"
@@ -2640,23 +2682,6 @@
     "button": {
       "later": "稍后",
       "starUs": "点亮星标"
-    }
-  },
-  "SyncAndRestoreSettingsPage": {
-    "launcherConfig": {
-      "title": "启动器设置",
-      "settings": {
-        "internetSync": {
-          "title": "联网同步",
-          "import": "导入",
-          "export": "导出"
-        },
-        "restoreAll": {
-          "title": "还原所有设置",
-          "description": "将所有启动器设置还原为默认值",
-          "restore": "还原"
-        }
-      }
     }
   },
   "SyncConfigExportModal": {
