@@ -21,6 +21,7 @@ import { useRouter } from "next/router";
 import { cloneElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LuArrowLeftRight, LuPlus, LuSettings } from "react-icons/lu";
+import { AttendanceCard } from "@/components/attendance-card";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import { CompactButtonGroup } from "@/components/common/compact-button-group";
 import InstancesView from "@/components/instances-view";
@@ -110,6 +111,7 @@ const HomeButtonGroup = () => {
 
   return (
     <Flex wrap="wrap" justify="flex-end" align="flex-end" gap={4}>
+      <AttendanceCard />
       <Card
         className={styles["selected-user-card"] + " " + cardStyles["card-back"]}
       >
