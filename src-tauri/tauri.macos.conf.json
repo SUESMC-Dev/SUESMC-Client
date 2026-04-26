@@ -2,7 +2,7 @@
   "identifier": "SUESMC-Client",
   "bundle": {
     "resources": {
-      "infoplist/**": "./"
+      "infoplist/**/*": "./"
     },
     "macOS": {
       "dmg": {
