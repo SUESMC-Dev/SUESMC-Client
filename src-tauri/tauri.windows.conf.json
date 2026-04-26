@@ -6,10 +6,8 @@
         "installerIcon": "assets/icons/icon.ico",
         "languages": [
           "English",
-          "SimpChinese",
-          "TradChinese"
-        ],
-        "sidebarImage": "assets/misc/nsis_sidebar.bmp"
+          "SimpChinese"
+        ]
       }
     }
   },

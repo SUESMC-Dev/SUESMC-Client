@@ -6,7 +6,6 @@
     },
     "macOS": {
       "dmg": {
-        "background": "assets/misc/dmg_bg.png",
         "windowSize": {
           "width": 640,
           "height": 440
