@@ -1,3 +1,5 @@
+import type { HomeWidgetStateTuple } from "@/models/extension";
+
 export interface GameConfig {
   gameJava: {
     auto: boolean;
@@ -35,15 +37,17 @@ export interface GameConfig {
       postExitCommand: string;
     };
     jvm: {
-      args: string;
+      garbageCollector: string;
       javaPermanentGenerationSpace: number;
       environmentVariable: string;
+      args: string;
     };
     workaround: {
       noJvmArgs: boolean;
       gameFileValidatePolicy: string;
       dontCheckJvmValidity: boolean;
       dontPatchNatives: boolean;
+      useLwjglUnsafeAgent: boolean;
       useNativeGlfw: boolean;
       useNativeOpenal: boolean;
     };
@@ -76,7 +80,7 @@ export interface LauncherConfig {
       primaryColor: string;
       colorMode: "light" | "dark" | "system";
       useLiquidGlassDesign: boolean;
-      headNavStyle: string;
+      headNavStyle: "standard" | "simplified" | "adaptive";
     };
     font: {
       fontFamily: string;
@@ -117,8 +121,10 @@ export interface LauncherConfig {
       language: string;
     };
     functionality: {
+      discoverPage: string;
       instancesNavType: string;
       launchPageQuickSwitch: boolean;
+      autoDownloadJava: boolean;
       resourceTranslation: boolean;
       translatedFilenamePrefix: boolean;
       skipFirstScreenOptions: boolean;
@@ -134,6 +140,10 @@ export interface LauncherConfig {
         port: number;
       };
     };
+  };
+  extension: {
+    enabled: string[];
+    homeWidgetState: HomeWidgetStateTuple[];
   };
   localGameDirectories: GameDirectory[];
   globalGameConfig: GameConfig;
@@ -181,8 +191,8 @@ export const defaultGameConfig: GameConfig = {
   },
   gameWindow: {
     resolution: {
-      width: 1280,
-      height: 720,
+      width: 854,
+      height: 480,
       fullscreen: false,
     },
     customTitle: "",
@@ -207,15 +217,17 @@ export const defaultGameConfig: GameConfig = {
       postExitCommand: "",
     },
     jvm: {
-      args: "",
+      garbageCollector: "auto",
       javaPermanentGenerationSpace: 0,
       environmentVariable: "",
+      args: "",
     },
     workaround: {
       noJvmArgs: false,
       gameFileValidatePolicy: "normal",
       dontCheckJvmValidity: false,
       dontPatchNatives: false,
+      useLwjglUnsafeAgent: true,
       useNativeGlfw: false,
       useNativeOpenal: false,
     },
@@ -243,7 +255,7 @@ export const defaultConfig: LauncherConfig = {
       primaryColor: "blue",
       colorMode: "light",
       useLiquidGlassDesign: false,
-      headNavStyle: "standard",
+      headNavStyle: "adaptive",
     },
     font: {
       fontFamily: "%built-in",
@@ -284,8 +296,10 @@ export const defaultConfig: LauncherConfig = {
       language: "zh-Hans",
     },
     functionality: {
+      discoverPage: "on",
       instancesNavType: "instance",
       launchPageQuickSwitch: true,
+      autoDownloadJava: true,
       resourceTranslation: true,
       translatedFilenamePrefix: true,
       skipFirstScreenOptions: false,
@@ -301,6 +315,10 @@ export const defaultConfig: LauncherConfig = {
         port: 18970,
       },
     },
+  },
+  extension: {
+    enabled: [],
+    homeWidgetState: [],
   },
   localGameDirectories: [{ name: "Current", dir: ".minecraft/" }],
   globalGameConfig: defaultGameConfig,

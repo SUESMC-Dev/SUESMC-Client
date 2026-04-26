@@ -24,6 +24,7 @@ import {
   LuCircleMinus,
   LuClockArrowUp,
   LuSearch,
+  LuSquareLibrary,
   LuTriangleAlert,
   LuX,
 } from "react-icons/lu";
@@ -38,13 +39,16 @@ import {
   modLoaderTypes,
   modLoaderTypesToIcon,
 } from "@/components/loader-selector";
-import { ChangeModLoaderModal } from "@/components/modals/change-mod-loader-modal";
+import { ChangeLoaderModal } from "@/components/modals/change-loader-modal";
 import CheckModUpdateModal from "@/components/modals/check-mod-update-modal";
 import ModInfoModal from "@/components/modals/mod-info-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
+import { useExtensionHost } from "@/contexts/extension/host";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
 import { useToast } from "@/contexts/toast";
+import { ExtensionUISlotKey } from "@/enums/extension";
 import { InstanceSubdirType, ModLoaderType } from "@/enums/instance";
 import { OtherResourceType } from "@/enums/resource";
 import { InstanceError } from "@/enums/service-error";
@@ -60,12 +64,14 @@ const InstanceModsPage = () => {
   const { t } = useTranslation();
   const toast = useToast();
   const {
+    instanceId,
     summary,
     openInstanceSubdir,
     handleImportResource,
     getLocalModList,
     isLocalModListLoading: isLoading,
   } = useInstanceSharedData();
+  const { getExtensionSlotItems } = useExtensionHost();
   const { config, update } = useLauncherConfig();
   const { openSharedModal, openGenericConfirmDialog } = useSharedModals();
   const primaryColor = config.appearance.theme.primaryColor;
@@ -90,9 +96,9 @@ const InstanceModsPage = () => {
     useState<LocalModInfo | null>(null);
 
   const {
-    isOpen: isChangeModLoaderModalOpen,
-    onOpen: onChangeModLoaderModalOpen,
-    onClose: onChangeModLoaderModalClose,
+    isOpen: isChangeLoaderModalOpen,
+    onOpen: onChangeLoaderModalOpen,
+    onClose: onChangeLoaderModalClose,
   } = useDisclosure();
 
   const {
@@ -117,7 +123,7 @@ const InstanceModsPage = () => {
     if (response.status === "success") {
       if (response.data) {
         setTargetLoaderType(type);
-        onChangeModLoaderModalOpen();
+        onChangeLoaderModalOpen();
       } else {
         toast({
           title: t("Services.instance.changeModLoader.error.title"),
@@ -185,6 +191,24 @@ const InstanceModsPage = () => {
   useEffect(() => {
     if (isSearching) searchInputRef.current?.focus();
   }, [isSearching]);
+
+  useFileDnD({
+    extensions: ["jar"],
+    titleKey: "InstanceModsPage.fileDnD.title",
+    descKey: "InstanceModsPage.fileDnD.desc",
+    icon: LuSquareLibrary,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.mods"),
+        filterExt: ["jar", "disabled"],
+        tgtDirType: InstanceSubdirType.Mods,
+        path,
+        onSuccessCallback: () => {
+          getLocalModListWrapper(true);
+        },
+      });
+    },
+  });
 
   const handleClearSearch = () => {
     setQuery("");
@@ -300,7 +324,6 @@ const InstanceModsPage = () => {
           filterName: t("InstanceDetailsLayout.instanceTabList.mods"),
           filterExt: ["zip", "jar", "disabled"],
           tgtDirType: InstanceSubdirType.Mods,
-          decompress: false,
           onSuccessCallback: () => {
             getLocalModListWrapper(true);
           },
@@ -316,6 +339,11 @@ const InstanceModsPage = () => {
   ];
 
   const modItemMenuOperations = (mod: LocalModInfo) => [
+    ...getExtensionSlotItems(ExtensionUISlotKey.InstanceModItemMenuOperations, {
+      mod,
+      instanceId,
+      summary,
+    }),
     ...(mod.potentialIncompatibility
       ? [
           {
@@ -631,9 +659,9 @@ const InstanceModsPage = () => {
         localMods={localMods}
       />
 
-      <ChangeModLoaderModal
-        isOpen={isChangeModLoaderModalOpen}
-        onClose={onChangeModLoaderModalClose}
+      <ChangeLoaderModal
+        isOpen={isChangeLoaderModalOpen}
+        onClose={onChangeLoaderModalClose}
         defaultSelectedType={targetLoaderType}
       />
 

@@ -11,7 +11,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LuCheck, LuX } from "react-icons/lu";
+import { LuCheck, LuEarth, LuX } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import CountTag from "@/components/common/count-tag";
@@ -20,10 +20,13 @@ import { OptionItem, OptionItemGroup } from "@/components/common/option-item";
 import { Section } from "@/components/common/section";
 import AddGameServerModal from "@/components/modals/add-game-server-modal";
 import WorldLevelDataModal from "@/components/modals/world-level-data-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
+import { useExtensionHost } from "@/contexts/extension/host";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
 import { useToast } from "@/contexts/toast";
+import { ExtensionUISlotKey } from "@/enums/extension";
 import { InstanceSubdirType } from "@/enums/instance";
 import { OtherResourceType } from "@/enums/resource";
 import { GetStateFlag } from "@/hooks/get-state";
@@ -46,6 +49,7 @@ const InstanceWorldsPage = () => {
   } = useInstanceSharedData();
   const accordionStates = config.states.instanceWorldsPage.accordionStates;
   const toast = useToast();
+  const { getExtensionSlotItems } = useExtensionHost();
   const { openSharedModal, openGenericConfirmDialog } = useSharedModals();
   const [worlds, setWorlds] = useState<WorldInfo[]>([]);
   const [selectedWorldName, setSelectedWorldName] = useState<string>();
@@ -78,6 +82,23 @@ const InstanceWorldsPage = () => {
   useEffect(() => {
     getWorldListWrapper();
   }, [getWorldListWrapper]);
+
+  useFileDnD({
+    extensions: ["zip"],
+    titleKey: "InstanceWorldsPage.fileDnD.title",
+    descKey: "InstanceWorldsPage.fileDnD.desc",
+    icon: LuEarth,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.worlds"),
+        filterExt: ["zip"],
+        tgtDirType: InstanceSubdirType.Saves,
+        path,
+        decompress: true,
+        onSuccessCallback: () => getWorldListWrapper(true),
+      });
+    },
+  });
 
   const handleRetrieveGameServerList = useCallback(
     (queryOnline: boolean) => {
@@ -192,6 +213,14 @@ const InstanceWorldsPage = () => {
   ];
 
   const worldItemMenuOperations = (save: WorldInfo) => [
+    ...getExtensionSlotItems(
+      ExtensionUISlotKey.InstanceWorldItemMenuOperations,
+      {
+        save,
+        instanceId,
+        summary,
+      }
+    ),
     {
       label: "",
       icon: "copyOrMove",
@@ -232,6 +261,14 @@ const InstanceWorldsPage = () => {
   ];
 
   const serverItemMenuOperations = (server: GameServerInfo) => [
+    ...getExtensionSlotItems(
+      ExtensionUISlotKey.InstanceServerItemMenuOperations,
+      {
+        server,
+        instanceId,
+        summary,
+      }
+    ),
     {
       icon: "delete",
       danger: true,

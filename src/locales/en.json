@@ -116,6 +116,12 @@
       }
     }
   },
+  "MainLayout": {
+    "fileDnD": {
+      "title": "Import Modpack",
+      "desc": "Import modpack file {{fileName}} to SUESMC Client"
+    }
+  },
   "AddAuthServerModal": {
     "header": {
       "title": "Add Authentication Server"
@@ -285,7 +291,8 @@
           "title": "Navigation Bar Style",
           "type": {
             "standard": "Standard",
-            "simplified": "Simplified"
+            "simplified": "Simplified",
+            "adaptive": "Adaptive"
           }
         }
       }
@@ -368,16 +375,26 @@
       "relogin": "Re-login"
     }
   },
-  "ChangeModLoaderModal": {
+  "ChangeLoaderModal": {
     "header": {
-      "title": {
-        "change": "Change Mod Loader",
-        "install": "Install Mod Loader"
+      "modloader": {
+        "title": {
+          "change": "Change Mod Loader",
+          "install": "Install Mod Loader"
+        }
+      },
+      "optifine": {
+        "title": {
+          "change": "Change OptiFine",
+          "install": "Install OptiFine"
+        }
       }
     },
     "notSelectedLoader": "No new loader selected",
+    "notSelectedOptifine": "No new Optifine selected",
     "footer": {
       "installFabricApi": "Install Fabric API Mod",
+      "installQFAPI": "Install QFAPI / QSL Mod (if available)",
       "reinstall": "Reinstall"
     }
   },
@@ -446,7 +463,8 @@
       "info": "Basic Settings"
     },
     "footer": {
-      "installFabricApi": "Install Fabric API Mod"
+      "installFabricApi": "Install Fabric API Mod",
+      "installQFAPI": "Install QFAPI / QSL Mod (if available)"
     }
   },
   "CreateRenamedInstShortcutAlertDialog": {
@@ -643,8 +661,10 @@
     },
     "task": {
       "game-client": "Game Client {{param}}",
+      "game-client-w-java": "Game Client {{param1}} (with Java {{param2}})",
       "game-server": "Game Server {{param}}",
       "change-mod-loader": "Change Mod Loader {{param}}",
+      "change-optifine": "Change Shaderpack Loader {{param}}",
       "mod": "Mod",
       "world": "World",
       "resourcepack": "Resourcepack",
@@ -656,7 +676,9 @@
       "retry": "Retry",
       "neoforge-libraries": "NeoForge Libraries",
       "forge-libraries": "Forge Libraries",
+      "optifine-libraries": "OptiFine Libraries",
       "launcher-update": "Update Launcher",
+      "extension-update": "Update Extension {{param1}} {{param2}}",
       "mojang-java": "Java {{param}} Runtime"
     }
   },
@@ -712,6 +734,14 @@
   "Empty": {
     "noData": "No Data"
   },
+  "EnableExtensionConfirmDialog": {
+    "title": "Enable Extension",
+    "body": "Are you sure you want to enable the extension <hl>{{name}}</hl> (<hl>{{identifier}}</hl>) from <hl>{{author}}</hl>? ",
+    "button": {
+      "enable": "Enable"
+    },
+    "unknownDeveloper": "Unknown developer"
+  },
   "Enums": {
     "chakraColors": {
       "gray": "Gray",
@@ -757,6 +787,106 @@
       "windows": "File Explorer"
     }
   },
+  "ExportModpackModal": {
+    "header": {
+      "title": "Export {{param}} as Modpack"
+    },
+    "label": {
+      "exportFormat": "Export Format",
+      "basicInfo": "Basic Information",
+      "modpackName": "Modpack Name",
+      "modpackVersion": "Modpack Version",
+      "author": "Author",
+      "description": "Description",
+      "includedFiles": "Included Files",
+      "exportOptions": "Export Options",
+      "packWithLauncher": "Pack With Launcher",
+      "minMemory": "Minimum Memory (MB)",
+      "noCreateRemoteFiles": "Disable Remote Files",
+      "skipCurseForgeRemoteFiles": "Skip CurseForge Remote Files"
+    },
+    "button": {
+      "export": "Export"
+    },
+    "error": {
+      "invalidName": "Please enter a valid modpack name",
+      "invalidVersion": "Please enter a valid version number",
+      "noFileSelected": "Please select at least one file or folder to include"
+    },
+    "errorMessage": {
+      "error-1": "Name cannot be empty",
+      "error-2": "Name contains invalid characters",
+      "error-3": "Name is too long (max 255 characters)"
+    },
+    "fileTreeTranslation": {
+      "mods": "Mods",
+      "config": "Mod Config Files",
+      "shaderpacks": "Shaders",
+      "resourcepacks": "Resource Packs",
+      "optionsTxt": "Game Settings",
+      "saves": "Saves"
+    },
+    "tooltip": {
+      "exportFormat": {
+        "Modrinth": "Smaller package size; required mods are downloaded from a manifest during import.",
+        "MultiMC": "Widely supported by major launchers; packaged as a complete instance."
+      }
+    }
+  },
+  "ExtensionContributionWrapper": {
+    "failedToRender": "Failed to render this extension content."
+  },
+  "ExtensionHostContextProvider": {
+    "extensionProvidedDialog": "This dialog is provided by extension {{name}}",
+    "toast": {
+      "activateError": "Failed to activate extension {{name}}"
+    }
+  },
+  "ExtensionInfoModal": {
+    "label": {
+      "author": "Author",
+      "description": "Description"
+    }
+  },
+  "ExtensionOpenExternalLinkConfirmDialog": {
+    "title": "Open External Link",
+    "body": "Extension {{extension}} wants to open {{link}} in your external browser.",
+    "button": {
+      "open": "Open"
+    }
+  },
+  "ExtensionSettingsDetailPage": {
+    "title": "Settings of {{name}}"
+  },
+  "ExtensionSettingsPage": {
+    "alert": "SUESMC Client cannot control the behavior of third-party extensions, including how they handle your personal data. Only install and enable extensions from trusted sources.",
+    "fileDnD": {
+      "title": "Install SJMCL Extension",
+      "desc": "Install extension file {{fileName}} to SUESMC Client"
+    },
+    "installed": "Installed Extensions",
+    "menu": {
+      "info": "Extension Info"
+    },
+    "top": {
+      "settings": {
+        "extensionDocs": {
+          "title": "Extension Development Documentation",
+          "description": "Read the introduction to the extension system and API docs, and get started quickly with the scaffold.",
+          "url": "https://mc.sjtu.cn/sjmcl/en/dev/extension/"
+        },
+        "awesomeExtensions": {
+          "title": "Discover Community Extensions",
+          "description": "Visit GitHub to browse a list of extensions developed by the community.",
+          "url": "https://github.com/SJMC-Dev/awesome-SJMCL-extensions"
+        }
+      }
+    }
+  },
+  "ExtensionUpdateConfirmDialog": {
+    "title": "Update Extension",
+    "body": "Extension {{identifier}} downloaded the new version {{version}} from {{src}}. Do you want to confirm installation?"
+  },
   "GameAdvancedSettingsPage": {
     "title": "Advanced Settings",
     "topWarning": "Advanced settings are for expert users. Changing them may break the game. Do not modify unless you know what you're doing.",
@@ -784,8 +914,17 @@
     "jvm": {
       "title": "Java VM Options",
       "settings": {
-        "args": {
-          "title": "JVM VM Argument"
+        "garbageCollector": {
+          "title": "Garbage Collector",
+          "desc": "Older Java versions may not include specific garbage collectors.",
+          "options": {
+            "auto": "Auto (Default)",
+            "g1gc": "G1GC",
+            "zgc": "ZGC",
+            "shenandoah": "ShenandoahGC",
+            "parallel": "ParallelGC",
+            "serial": "SerialGC"
+          }
         },
         "javaPermanentGenerationSpace": {
           "title": "PermGen Space",
@@ -793,6 +932,9 @@
         },
         "environmentVariable": {
           "title": "Environment Variables"
+        },
+        "args": {
+          "title": "Other JVM Arguments"
         }
       }
     },
@@ -811,6 +953,10 @@
         },
         "dontPatchNatives": {
           "title": "Do not attempt to automatically replace native libraries"
+        },
+        "useLwjglUnsafeAgent": {
+          "title": "Enable LWJGL Unsafe Agent",
+          "description": "Automatically use HMCL's <hmcl>LWJGL Unsafe Agent</hmcl> on affected Minecraft versions to fix performance issues."
         },
         "useNativeGlfw": {
           "title": "Use System GLFW(Linux Only)"
@@ -968,10 +1114,12 @@
     "notice": "Notice",
     "open": "Open",
     "openFolder": "Open Folder",
+    "optional": "Optional",
     "previous": "Previous",
     "refresh": "Refresh",
     "revealFile": "Reveal in {{opener}}",
     "search": "Search",
+    "settings": "Settings",
     "share": {
       "text": "Share",
       "toast": {
@@ -1011,6 +1159,13 @@
     "functions": {
       "title": "Functionality",
       "settings": {
+        "discoverPage": {
+          "title": "Discover Page",
+          "description": "Conveniently browse Minecraft and community news, search and download game resource from the Discover page.",
+          "on": "On",
+          "search-only": "Search Only",
+          "off": "Hidden"
+        },
         "instancesNavType": {
           "title": "Instance Page Navigation Mode",
           "description": "Change whether the instance page's left navigation bar is displayed and its grouping method.",
@@ -1022,6 +1177,10 @@
         "launchPageQuickSwitch": {
           "title": "Quick Switch for Accounts & Instances",
           "description": "When enabled, clicking the switch button on the launch page allows direct selection of accounts and instances instead of navigating to another page."
+        },
+        "autoDownloadJava": {
+          "title": "Auto-download Suitable Java Runtime",
+          "description": "When enabled, if no suitable Java runtime is available when creating a new instance, it will be installed automatically to a dedicated directory"
         }
       }
     },
@@ -1166,7 +1325,7 @@
     },
     "step3": {
       "title": "Discover Page",
-      "content": "Here you can browse Minecraft and community news, discover and download various related resources such as mods, maps, and modpacks.<br/>You can also quickly open \"Global Search\" with the keyboard shortcut <key>{{keyname}}</key> + <key>S</key>."
+      "content": "Here you can browse Minecraft and community news, discover and download various related resources such as mods, maps, and modpacks.<br/>You can also quickly open \"Global Search\" with the keyboard shortcut <key>{{keyname}}</key> + <key>F</key>."
     },
     "step4": {
       "title": "Launch Minecraft!",
@@ -1232,6 +1391,14 @@
           "url": "https://mc.sjtu.cn/sjmcl/en/docs/user-group"
         }
       }
+    }
+  },
+  "HomeWidget": {
+    "extraOpMenu": {
+      "moveUp": "Move This Widget Up",
+      "moveDown": "Move This Widget Down",
+      "extensionInfo": "View Extension Info",
+      "settings": "Open Extension Settings"
     }
   },
   "ImportAccountInfoModal": {
@@ -1303,6 +1470,10 @@
     }
   },
   "InstanceModsPage": {
+    "fileDnD": {
+      "title": "Install Mods",
+      "desc": "Install mod file {{fileName}} to this instance"
+    },
     "modLoaderList": {
       "title": "Mod Loader",
       "notInstalled": "Not Installed",
@@ -1321,11 +1492,24 @@
     }
   },
   "InstanceResourcePacksPage": {
+    "fileDnD": {
+      "title": "Add Resource Packs",
+      "desc": "Add resource pack file {{fileName}} to this instance"
+    },
     "resourcePackList": {
       "title": "Global Resource Packs"
     },
     "serverResPackList": {
       "title": "Server Resource Packs"
+    }
+  },
+  "InstanceSchematicsPage": {
+    "fileDnD": {
+      "title": "Add Schematics",
+      "desc": "Add schematic file {{fileName}} to this instance"
+    },
+    "schematicList": {
+      "title": "Schematics"
     }
   },
   "InstanceScreenshotsPage": {
@@ -1352,18 +1536,16 @@
     }
   },
   "InstanceShaderPacksPage": {
+    "fileDnD": {
+      "title": "Add Shader Packs",
+      "desc": "Add shader pack file {{fileName}} to this instance"
+    },
     "shaderLoaderList": {
       "title": "Loaders",
       "notInstalled": "Not Installed"
     },
     "shaderPackList": {
       "title": "Shader Packs"
-    }
-  },
-  "InstanceSchematicsPage": {
-    "schematicList": {
-      "title": "Schematics",
-      "preview": "Preview"
     }
   },
   "InstanceWidgets": {
@@ -1389,6 +1571,10 @@
     }
   },
   "InstanceWorldsPage": {
+    "fileDnD": {
+      "title": "Add Worlds",
+      "desc": "Add save file {{fileName}} to this instance"
+    },
     "worldList": {
       "title": "Worlds",
       "lastPlayedAt": "Last played",
@@ -1466,6 +1652,13 @@
       "description": "Confirm the removal of this Java? (SUESMC Client will no longer scan this directory, but your files remain on the disk.)"
     }
   },
+  "LastExitedAbnormallyDialog": {
+    "dialog": {
+      "title": "Previous Run Exited Abnormally",
+      "content": "SUESMC Client exited abnormally during the last run. If you encounter the same problem using the original SJMC Launcher, you can send the logs to the SJMCL <community>community</community>, or open an issue on <github>GitHub</github> for help.",
+      "viewLog": "View Logs"
+    }
+  },
   "LaunchPage": {
     "button": {
       "launch": "Launch Game",
@@ -1482,13 +1675,6 @@
     "Text": {
       "noSelectedPlayer": "No player selected",
       "noSelectedGame": "No game instance selected"
-    }
-  },
-  "LastExitedAbnormallyDialog": {
-    "dialog": {
-      "title": "Previous Run Exited Abnormally",
-      "content": "SUESMC Client exited abnormally during the last run. If you encounter the same problem using the original SJMC Launcher, you can send the logs to the SJMCL <community>community</community>, or open an issue on <github>GitHub</github> for help.",
-      "viewLog": "View Logs"
     }
   },
   "LaunchProcessModal": {
@@ -1512,6 +1698,9 @@
     "releaseDate": "Released at {{date}}",
     "notCompatibleWith": "Not compatible with {{item}}",
     "noVersionSelected": "No version selected"
+  },
+  "MainWindowTitlebar": {
+    "extensionProvidedPage": "This page is provided by extension {{name}}"
   },
   "ManageSkinModal": {
     "skinManage": "Manage Skin",
@@ -1569,18 +1758,6 @@
       "showAll": "Show All (+{{left}})"
     }
   },
-  "PlayerMenu": {
-    "label": {
-      "manageSkin": "Manage Skin",
-      "viewSkin": "View Skin",
-      "delete": "Delete",
-      "copyUUID": "Copy UUID"
-    },
-    "toast": {
-      "refreshing": "Refreshing player info",
-      "deleting": "Deleting player"
-    }
-  },
   "PingTestPage": {
     "PingServerList": {
       "title": "Service Connectivity Test",
@@ -1597,6 +1774,18 @@
       "sjmclapi": "SJMC Launcher API"
     }
   },
+  "PlayerMenu": {
+    "label": {
+      "manageSkin": "Manage Skin",
+      "viewSkin": "View Skin",
+      "delete": "Delete",
+      "copyUUID": "Copy UUID"
+    },
+    "toast": {
+      "refreshing": "Refreshing player info",
+      "deleting": "Deleting player"
+    }
+  },
   "ReLoginPlayerModal": {
     "modal": {
       "title": "Re-login"
@@ -1610,16 +1799,6 @@
     },
     "button": {
       "login": "Login"
-    }
-  },
-  "RestartForUpdateConfirmDialog": {
-    "title": "Launcher Update",
-    "body": "The new version has been downloaded. Restart SUESMC Client to complete the update.",
-    "bodyMSI": "The new version has been downloaded. Clicking Install will close SUESMC Client and run the installer.",
-    "button": {
-      "restart": "Restart",
-      "install": "Install",
-      "later": "Later"
     }
   },
   "ResourceDownloader": {
@@ -1906,6 +2085,16 @@
       "All": "All"
     }
   },
+  "RestartForUpdateConfirmDialog": {
+    "title": "Launcher Update",
+    "body": "The new version has been downloaded. Restart SUESMC Client to complete the update.",
+    "bodyMSI": "The new version has been downloaded. Clicking Install will close SUESMC Client and run the installer.",
+    "button": {
+      "restart": "Restart",
+      "install": "Install",
+      "later": "Later"
+    }
+  },
   "RestoreConfigConfirmDialog": {
     "title": "Restore Launcher Settings",
     "body": "This action will restore all launcher settings to their default values. Are you sure you want to proceed?"
@@ -2042,6 +2231,7 @@
           "title": "Failed to add offline player",
           "description": {
             "DUPLICATE": "Player already exists",
+            "FULL_LOGIN_UNAVAILABLE": "Please log in with your Microsoft account before accessing this feature.",
             "INVALID": "UUID is invalid",
             "TEXTURE_ERROR": "Unable to get player texture"
           }
@@ -2064,6 +2254,7 @@
           "title": "Failed to add player",
           "description": {
             "DUPLICATE": "Player already exists",
+            "FULL_LOGIN_UNAVAILABLE": "Please log in with your Microsoft account before accessing this feature.",
             "NETWORK_ERROR": "Unable to connect to the server",
             "PARSE_ERROR": "The server returned data in an incorrect format",
             "NOT_FOUND": "The authentication server does not exist",
@@ -2094,6 +2285,7 @@
           "title": "Failed to add player",
           "description": {
             "DUPLICATE": "Player already exists",
+            "FULL_LOGIN_UNAVAILABLE": "Please log in with your Microsoft account before accessing this feature.",
             "NETWORK_ERROR": "Unable to connect to the server",
             "PARSE_ERROR": "The server returned data in an incorrect format",
             "INVALID": "Wrong account or password",
@@ -2121,6 +2313,7 @@
           "title": "Failed to add player",
           "description": {
             "DUPLICATE": "Player already exists",
+            "FULL_LOGIN_UNAVAILABLE": "Please log in with your Microsoft account before accessing this feature.",
             "NETWORK_ERROR": "Failed to connect to the server",
             "PARSE_ERROR": "The server returned data in an incorrect format",
             "EXPIRED": "The access token has expired, please re-login"
@@ -2563,6 +2756,23 @@
           }
         }
       },
+      "finishOptiFineLoaderInstall": {
+        "loading": "Installing OptiFine for {{instanceName}}",
+        "success": "OptiFine installed successfully",
+        "error": {
+          "title": "Failed to install OptiFine",
+          "description": {
+            "INSTANCE_NOT_FOUND_BY_ID": "Instance ID does not exist",
+            "INSTALLATION_DUPLICATED": "Another installation process is already in progress",
+            "PROCESSOR_EXECUTION_FAILED": "Failed to execute the install process",
+            "LOADER_INSTALLER_NOT_FOUND": "OptiFine installer file not found",
+            "MOD_LOADER_VERSION_PARSE_ERROR": "Failed to parse OptiFine version information",
+            "INVALID_SOURCE_PATH": "Invalid source path",
+            "NO_SUITABLE_JAVA": "No suitable Java runtime found",
+            "SELECTED_JAVA_UNAVAILABLE": "The selected Java runtime is unavailable"
+          }
+        }
+      },
       "checkChangeModLoaderAvailablity": {
         "error": {
           "title": "Unable to Change Mod Loader",
@@ -2588,10 +2798,52 @@
           }
         }
       },
+      "retrieveExportableFileList": {
+        "error": {
+          "title": "Failed to retrieve exportable file list"
+        }
+      },
+      "exportModpack": {
+        "success": "Modpack exported successfully",
+        "error": {
+          "title": "Failed to export modpack"
+        }
+      },
       "addCustomInstanceIcon": {
         "success": "Successfully added custom instance icon",
         "error": {
           "title": "Failed to add custom instance icon"
+        }
+      }
+    },
+    "extension": {
+      "retrieveExtensionList": {
+        "error": {
+          "title": "Failed to retrieve extension list"
+        }
+      },
+      "addExtension": {
+        "success": "Successfully added extension",
+        "error": {
+          "title": "Failed to add extension",
+          "description": {
+            "INVALID_PACKAGE_FORMAT": "The extension package content format is invalid",
+            "INVALID_IDENTIFIER": "Extension identifier is invalid",
+            "IDENTIFIER_MISMATCH": "The extension identifier does not match the expectation",
+            "INVALID_NAME": "Extension name is invalid",
+            "LAUNCHER_VERSION_TOO_LOW": "Launcher version is too low",
+            "EXTENSION_NOT_FOUND": "Target package file not found"
+          }
+        }
+      },
+      "deleteExtension": {
+        "success": "Successfully deleted extension",
+        "error": {
+          "title": "Failed to delete extension",
+          "description": {
+            "INVALID_IDENTIFIER": "Extension identifier is invalid",
+            "EXTENSION_NOT_FOUND": "Extension not found"
+          }
         }
       }
     },
@@ -2626,9 +2878,9 @@
       "appearance": "Appearance",
       "download": "Download",
       "intelligence": "Intelligence",
+      "extension": "Extension",
       "help": "Docs & Help",
-      "about": "About",
-      "dev-test": "Dev - Test Page"
+      "about": "About"
     }
   },
   "SkinPreview": {
@@ -2712,7 +2964,7 @@
   "UnavailableExePathAlertDialog": {
     "dialog": {
       "title": "Unsafe Execution Path",
-      "content": "SJMCL is currently running from a temporary or invalid directory. Your settings and game data may be lost. Please move SJMCL to another location and run it again.",
+      "content": "SUESMC Client is currently running from a temporary or invalid directory. Your settings and game data may be lost. Please move SUESMC Client to another location and run it again.",
       "btnContinue": "Run Anyway"
     }
   },

@@ -1,6 +1,7 @@
 mod account;
 mod discover;
 mod error;
+mod extension;
 mod instance;
 mod intelligence;
 mod launch;
@@ -57,7 +58,6 @@ pub async fn run() {
       .plugin(tauri_plugin_process::init())
       .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
         let main_window = app.get_webview_window("main").expect("no main window");
-
         let _ = main_window.show(); // may hide by launcher_visibility settings
                                     // FIXME: this show() seems no use in macOS build mode (ref: https://github.com/tauri-apps/tauri/issues/13400#issuecomment-2866462355).
         let _ = main_window.set_focus();
@@ -118,6 +118,7 @@ pub async fn run() {
         instance::commands::retrieve_instance_game_config,
         instance::commands::restore_instance_game_config,
         instance::commands::retrieve_instance_subdir_path,
+        instance::commands::read_instance_file,
         instance::commands::delete_instance,
         instance::commands::rename_instance,
         instance::commands::copy_resource_to_instances,
@@ -136,10 +137,13 @@ pub async fn run() {
         instance::commands::toggle_mod_by_extension,
         instance::commands::create_launch_desktop_shortcut,
         instance::commands::finish_mod_loader_install,
+        instance::commands::finish_optifine_loader_install,
         instance::commands::check_change_mod_loader_availablity,
         instance::commands::change_mod_loader,
         instance::commands::retrieve_modpack_meta_info,
         instance::commands::add_custom_instance_icon,
+        instance::commands::retrieve_exportable_file_list,
+        instance::commands::export_modpack,
         launch::commands::select_suitable_jre,
         launch::commands::validate_game_files,
         launch::commands::validate_selected_player,
@@ -161,6 +165,9 @@ pub async fn run() {
         resource::commands::fetch_remote_resource_by_id,
         discover::commands::fetch_news_sources_info,
         discover::commands::fetch_news_post_summaries,
+        extension::commands::retrieve_extension_list,
+        extension::commands::add_extension,
+        extension::commands::delete_extension,
         tasks::commands::schedule_progressive_task_group,
         tasks::commands::cancel_progressive_task,
         tasks::commands::resume_progressive_task,
@@ -175,11 +182,13 @@ pub async fn run() {
         tasks::commands::resume_progressive_task_group,
         tasks::commands::delete_progressive_task_group,
         utils::commands::retrieve_memory_info,
+        utils::commands::retrieve_truetype_font_list,
+        utils::commands::check_service_availability,
         utils::commands::extract_filename,
         utils::commands::delete_file,
         utils::commands::delete_directory,
-        utils::commands::retrieve_truetype_font_list,
-        utils::commands::check_service_availability,
+        utils::commands::read_file,
+        utils::commands::write_file,
       ])
       .setup(|app| {
         // init APP_DATA_DIR
@@ -324,14 +333,22 @@ pub async fn run() {
       })
       .build(tauri::generate_context!())
       .expect("error while building tauri application")
-      .run_return(|_, _| {})
+      .run_return(|_, event| {
+        if let tauri::RunEvent::Exit = event {
+          log::info!("Launcher exited normally.");
+          let _ = LauncherConfig::load().map(|mut config| {
+            config.last_run_exited_normally = true;
+            let _ = config.save();
+          });
+        }
+      })
   };
 
-  log::info!("Launcher exited with code {exit_code}.");
-  let _ = LauncherConfig::load().map(|mut config| {
-    config.last_run_exited_normally = exit_code == 0;
-    let _ = config.save();
-  });
+  // log::info!("Launcher exited with code {exit_code}.");
+  // let _ = LauncherConfig::load().map(|mut config| {
+  //   config.last_run_exited_normally = exit_code == 0;
+  //   let _ = config.save();
+  // });
 
   std::process::exit(exit_code);
 }

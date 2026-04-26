@@ -333,6 +333,7 @@ impl Storage for AccountInfo {
 pub enum AccountError {
   Duplicate,
   Expired,
+  FullLoginUnavailable,
   Invalid,
   NotFound,
   TextureError,

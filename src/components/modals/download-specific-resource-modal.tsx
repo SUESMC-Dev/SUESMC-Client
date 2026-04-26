@@ -61,8 +61,10 @@ import { ISOToDate } from "@/utils/datetime";
 import { translateTag } from "@/utils/resource";
 import { formatDisplayCount, sanitizeFileName } from "@/utils/string";
 
-interface DownloadSpecificResourceModalProps
-  extends Omit<ModalProps, "children"> {
+interface DownloadSpecificResourceModalProps extends Omit<
+  ModalProps,
+  "children"
+> {
   resource: OtherResourceInfo;
   curInstanceMajorVersion?: string;
   curInstanceVersion?: string;
@@ -110,6 +112,7 @@ const DownloadSpecificResourceModal: React.FC<
     ModLoaderType.Fabric,
     ModLoaderType.Forge,
     ModLoaderType.NeoForge,
+    ModLoaderType.Quilt,
   ];
 
   const iconBackgroundColor: Record<string, string> = {

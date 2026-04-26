@@ -9,6 +9,7 @@ use crate::launch::helpers::file_validator::get_nonnative_library_paths;
 use crate::launch::helpers::misc::{get_separator, replace_arguments};
 use crate::launch::models::{LaunchError, LaunchingState};
 use crate::launcher_config::models::*;
+use crate::utils::fs::get_app_resource_filepath;
 use crate::utils::sys_info::get_memory_info;
 use base64::engine::general_purpose;
 use base64::Engine;
@@ -237,6 +238,15 @@ pub async fn generate_launch_command(
       }
     }
 
+    match jvm.garbage_collector {
+      GarbageCollector::Auto => {}
+      GarbageCollector::G1gc => cmd.push("-XX:+UseG1GC".to_string()),
+      GarbageCollector::Zgc => cmd.push("-XX:+UseZGC".to_string()),
+      GarbageCollector::Shenandoah => cmd.push("-XX:+UseShenandoahGC".to_string()),
+      GarbageCollector::Parallel => cmd.push("-XX:+UseParallelGC".to_string()),
+      GarbageCollector::Serial => cmd.push("-XX:+UseSerialGC".to_string()),
+    }
+
     if !jvm.args.is_empty() {
       cmd.extend(jvm.args.split_whitespace().map(|s| s.to_string()));
     }
@@ -291,6 +301,34 @@ pub async fn generate_launch_command(
       "-Dauthlibinjector.yggdrasil.prefetched={}",
       general_purpose::STANDARD.encode(auth_server_meta.unwrap())
     ));
+  }
+
+  // LWJGL Unsafe Agent for JDK 25+ and LWJGL 3.4.x
+  // ref: https://github.com/HMCL-dev/lwjgl-unsafe-agent
+  if game_config.advanced.workaround.use_lwjgl_unsafe_agent && selected_java.major_version >= 25 {
+    let lwjgl_version = client_info.libraries.iter().find_map(|lib| {
+      let parts: Vec<&str> = lib.name.split(':').collect();
+      if parts.len() >= 3
+        && parts[0].eq_ignore_ascii_case("org.lwjgl")
+        && parts[1].eq_ignore_ascii_case("lwjgl")
+      {
+        Some(parts[2].to_string())
+      } else {
+        None
+      }
+    });
+    if let Some(ver) = lwjgl_version {
+      if ver.starts_with("3.4.") {
+        match get_app_resource_filepath(app, "assets/game/lwjgl-unsafe-agent.jar") {
+          Ok(agent_path) => {
+            cmd.push(format!("-javaagent:{}", agent_path.to_string_lossy()));
+          }
+          Err(e) => {
+            log::warn!("Failed to resolve lwjgl-unsafe-agent.jar: {:?}", e);
+          }
+        }
+      }
+    }
   }
 
   // -----------------------------------------

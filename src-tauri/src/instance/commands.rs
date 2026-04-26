@@ -12,7 +12,11 @@ use crate::instance::helpers::misc::{
   get_instance_game_config, get_instance_subdir_path_by_id, get_instance_subdir_paths,
   refresh_and_update_instances, unify_instance_name,
 };
-use crate::instance::helpers::modpack::misc::{
+use crate::instance::helpers::modpack::export::{
+  build_export_bundle, create_modpack_zip, list_files, validate_export_options,
+  ExportModpackOptions,
+};
+use crate::instance::helpers::modpack::import::{
   extract_overrides, get_download_params, ModpackMetaInfo,
 };
 use crate::instance::helpers::mods::common::{
@@ -32,12 +36,15 @@ use crate::instance::helpers::server::{
 use crate::instance::helpers::world::{load_level_data_from_nbt, load_world_info_from_dir};
 use crate::instance::models::misc::{
   Instance, InstanceError, InstanceSubdirType, InstanceSummary, LocalModInfo, ModLoader,
-  ModLoaderStatus, ModLoaderType, OptiFine, ResourcePackInfo, SchematicInfo, ScreenshotInfo,
-  ShaderPackInfo,
+  ModLoaderStatus, ModLoaderType, ModpackFileList, OptiFine, ResourcePackInfo, SchematicInfo,
+  ScreenshotInfo, ShaderPackInfo,
 };
 use crate::instance::models::world::base::WorldInfo;
 use crate::instance::models::world::level::LevelData;
 use crate::launch::helpers::file_validator::{get_invalid_assets, get_invalid_library_files};
+use crate::launch::helpers::jre_selector::{get_minimum_java_version_by_game, select_java_runtime};
+use crate::launch::models::LaunchError;
+use crate::launcher_config::helpers::java::build_mojang_java_download_params;
 use crate::launcher_config::helpers::misc::get_global_game_config;
 use crate::launcher_config::models::{GameConfig, GameDirectory, LauncherConfig};
 use crate::partial::{PartialError, PartialUpdate};
@@ -51,7 +58,7 @@ use crate::tasks::download::DownloadParam;
 use crate::tasks::PTaskParam;
 use crate::utils::fs::{
   copy_whole_dir, create_url_shortcut, generate_unique_filename, get_files_with_regex,
-  get_subdirectories,
+  get_subdirectories, normalize_relative_path,
 };
 use crate::utils::image::ImageWrapper;
 use lazy_static::lazy_static;
@@ -226,6 +233,28 @@ pub fn retrieve_instance_subdir_path(
     Some(path) => Ok(path),
     None => Err(InstanceError::InstanceNotFoundByID.into()),
   }
+}
+
+// Capability for extensions, CLI and external agents
+#[tauri::command]
+pub fn read_instance_file(
+  app: AppHandle,
+  instance_id: String,
+  dir_type: InstanceSubdirType,
+  path: String,
+  mode: Option<String>,
+) -> SJMCLResult<String> {
+  let subdir = retrieve_instance_subdir_path(app, instance_id, dir_type)?;
+  let relative_path =
+    normalize_relative_path(Path::new(&path)).map_err(|_| InstanceError::InvalidSourcePath)?;
+  let cano_subdir = fs::canonicalize(subdir)?;
+  let cano_target = fs::canonicalize(cano_subdir.join(relative_path))?;
+
+  if !cano_target.starts_with(&cano_subdir) {
+    return Err(InstanceError::InvalidSourcePath.into());
+  }
+
+  crate::utils::commands::read_file(cano_target.to_string_lossy().into_owned(), mode)
 }
 
 #[tauri::command]
@@ -954,13 +983,17 @@ pub async fn create_instance(
   optifine: Option<OptiFineResourceInfo>,
   modpack_path: Option<String>,
   is_install_fabric_api: Option<bool>,
+  is_install_qf_api: Option<bool>,
 ) -> SJMCLResult<()> {
   let client = app.state::<reqwest::Client>();
   let launcher_config_state = app.state::<Mutex<LauncherConfig>>();
   // Get priority list
-  let priority_list = {
+  let (priority_list, auto_download_java) = {
     let launcher_config = launcher_config_state.lock()?;
-    get_source_priority_list(&launcher_config)
+    (
+      get_source_priority_list(&launcher_config),
+      launcher_config.general.functionality.auto_download_java,
+    )
   };
 
   // Ensure the instance name is unique
@@ -1026,6 +1059,24 @@ pub async fn create_instance(
 
   let mut task_params = Vec::<PTaskParam>::new();
 
+  // auto download recommended java if needed
+  let mut java_version_to_download: Option<String> = None;
+  if auto_download_java {
+    let client_java_version = version_info
+      .java_version
+      .as_ref()
+      .map_or(0i32, |version| version.major_version);
+
+    if let Err(err) = select_java_runtime(&app, None, &instance, client_java_version).await {
+      if err.0 == LaunchError::NoSuitableJava.to_string() {
+        let minimum_java_version = get_minimum_java_version_by_game(&app, &instance, false).await;
+        let minimum_java_version = minimum_java_version.to_string();
+        task_params.extend(build_mojang_java_download_params(&app, &minimum_java_version).await?);
+        java_version_to_download = Some(minimum_java_version);
+      }
+    }
+  }
+
   // Download client (use task)
   let client_download_info = version_info
     .downloads
@@ -1078,6 +1129,7 @@ pub async fn create_instance(
       &mut version_info,
       &mut task_params,
       is_install_fabric_api,
+      is_install_qf_api,
     )
     .await?;
   }
@@ -1102,7 +1154,10 @@ pub async fn create_instance(
 
   schedule_progressive_task_group(
     app.clone(),
-    format!("game-client?{}", name),
+    match java_version_to_download {
+      Some(java_version) => format!("game-client-w-java?{}&{}", name, java_version),
+      None => format!("game-client?{}", name),
+    },
     task_params,
     true,
   )
@@ -1152,6 +1207,10 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
       .ok_or(InstanceError::InstanceNotFoundByID)?
       .clone()
   };
+  let client_info_dir = instance
+    .version_path
+    .join(format!("{}.json", instance.name));
+  let client_info = load_json_async::<McClientInfo>(&client_info_dir).await?;
 
   match instance.mod_loader.status {
     // prevent duplicated installation
@@ -1161,31 +1220,56 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
     ModLoaderStatus::Installing => {
       return Err(InstanceError::InstallationDuplicated.into());
     }
-    ModLoaderStatus::Installed => {
-      return Ok(());
+    ModLoaderStatus::Downloading => {
+      {
+        let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+        let mut state = binding.lock()?;
+        let instance = state
+          .get_mut(&instance_id)
+          .ok_or(InstanceError::InstanceNotFoundByID)?;
+        instance.mod_loader.status = ModLoaderStatus::Installing;
+      };
+
+      let install_profile_dir = instance.version_path.join("install_profile.json");
+      if install_profile_dir.exists() {
+        let install_profile = load_json_async::<InstallProfile>(&install_profile_dir).await?;
+        execute_processors(&app, &instance, &client_info, &install_profile).await?;
+      }
     }
     _ => {}
   }
 
-  {
+  let instance = {
     let binding = app.state::<Mutex<HashMap<String, Instance>>>();
     let mut state = binding.lock()?;
     let instance = state
       .get_mut(&instance_id)
       .ok_or(InstanceError::InstanceNotFoundByID)?;
-    instance.mod_loader.status = ModLoaderStatus::Installing;
+    instance.mod_loader.status = ModLoaderStatus::Installed;
+    instance.clone()
   };
+  instance.save_json_cfg().await?;
 
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn finish_optifine_loader_install(
+  app: AppHandle,
+  instance_id: String,
+) -> SJMCLResult<()> {
+  let instance = {
+    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+    let state = binding.lock()?;
+    state
+      .get(&instance_id)
+      .ok_or(InstanceError::InstanceNotFoundByID)?
+      .clone()
+  };
   let client_info_dir = instance
     .version_path
     .join(format!("{}.json", instance.name));
   let client_info = load_json_async::<McClientInfo>(&client_info_dir).await?;
-
-  let install_profile_dir = instance.version_path.join("install_profile.json");
-  if install_profile_dir.exists() {
-    let install_profile = load_json_async::<InstallProfile>(&install_profile_dir).await?;
-    execute_processors(&app, &instance, &client_info, &install_profile).await?;
-  }
 
   if let Some(optifine) = &instance.optifine {
     match optifine.status {
@@ -1196,29 +1280,26 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
       ModLoaderStatus::Installing => {
         return Err(InstanceError::InstallationDuplicated.into());
       }
-      ModLoaderStatus::Installed => {
-        return Ok(());
+      ModLoaderStatus::Downloading => {
+        {
+          let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+          let mut state = binding.lock()?;
+          let instance = state
+            .get_mut(&instance_id)
+            .ok_or(InstanceError::InstanceNotFoundByID)?;
+          instance.optifine.as_mut().unwrap().status = ModLoaderStatus::Installing;
+        };
+        finish_optifine_install(&app, &instance, &client_info).await?;
       }
       _ => {}
     }
-    {
-      let binding = app.state::<Mutex<HashMap<String, Instance>>>();
-      let mut state = binding.lock()?;
-      let instance = state
-        .get_mut(&instance_id)
-        .ok_or(InstanceError::InstanceNotFoundByID)?;
-      instance.optifine.as_mut().unwrap().status = ModLoaderStatus::Installing;
-    };
-    finish_optifine_install(&app, &instance, &client_info).await?;
   }
-
   let instance = {
     let binding = app.state::<Mutex<HashMap<String, Instance>>>();
     let mut state = binding.lock()?;
     let instance = state
       .get_mut(&instance_id)
       .ok_or(InstanceError::InstanceNotFoundByID)?;
-    instance.mod_loader.status = ModLoaderStatus::Installed;
     if let Some(optifine) = &mut instance.optifine {
       optifine.status = ModLoaderStatus::Installed;
     }
@@ -1265,8 +1346,10 @@ pub async fn check_change_mod_loader_availablity(
 pub async fn change_mod_loader(
   app: AppHandle,
   instance_id: String,
-  new_mod_loader: ModLoaderResourceInfo,
+  new_mod_loader: Option<ModLoaderResourceInfo>,
+  new_optifine: Option<OptiFineResourceInfo>,
   is_install_fabric_api: Option<bool>,
+  is_install_qf_api: Option<bool>,
 ) -> SJMCLResult<()> {
   let mut instance = {
     let binding = app.state::<Mutex<HashMap<String, Instance>>>();
@@ -1276,39 +1359,31 @@ pub async fn change_mod_loader(
       .ok_or(InstanceError::InstanceNotFoundByID)?
       .clone()
   };
+  let original_optifine_config = instance.optifine.clone();
   let version_isolation = get_instance_game_config(&app, &instance).version_isolation;
-  // Get priority list
   let priority_list = {
     let launcher_config_state = app.state::<Mutex<LauncherConfig>>();
     let launcher_config = launcher_config_state.lock()?;
     get_source_priority_list(&launcher_config)
   };
-
-  // load current version info
   let json_path = instance
     .version_path
     .join(format!("{}.json", instance.name));
   let current_info: McClientInfo = load_json_async(&json_path).await?;
+  let original_optifine_patch = current_info
+    .patches
+    .iter()
+    .find(|p| p.id.to_lowercase().contains("optifine"))
+    .cloned();
+
   let vanilla_info = current_info
     .patches
     .first()
     .cloned()
     .ok_or(InstanceError::NotSupportChangeModLoader)?;
 
-  let mod_loader = ModLoader {
-    loader_type: new_mod_loader.loader_type,
-    version: new_mod_loader.version.clone(),
-    status: if matches!(
-      new_mod_loader.loader_type,
-      ModLoaderType::Unknown | ModLoaderType::Fabric
-    ) {
-      ModLoaderStatus::Installed
-    } else {
-      ModLoaderStatus::NotDownloaded
-    },
-    branch: new_mod_loader.branch.clone(),
-  };
   let game_version = instance.version.clone();
+  let old_optifine = instance.optifine.clone();
   let subdirs = get_instance_subdir_paths(
     &app,
     &instance,
@@ -1318,44 +1393,127 @@ pub async fn change_mod_loader(
   let [libraries_dir, mods_dir] = subdirs.as_slice() else {
     return Err(InstanceError::InstanceNotFoundByID.into());
   };
-  // Remove Fabric API mods if switching from Fabric modloader
-  if instance.mod_loader.loader_type == ModLoaderType::Fabric && version_isolation {
-    remove_fabric_api_mods(mods_dir).await?;
+
+  if let Some(new_loader) = &new_mod_loader {
+    // Remove Fabric API / QFAPI mods if switching from Fabric or Quilt modloader
+    if matches!(
+      instance.mod_loader.loader_type,
+      ModLoaderType::Fabric | ModLoaderType::Quilt
+    ) && instance.mod_loader.loader_type != new_loader.loader_type
+      && version_isolation
+    {
+      remove_fabric_api_mods(mods_dir).await?;
+    }
   }
-  // construct new version info
-  instance.mod_loader = mod_loader.clone();
-  let mut version_info: McClientInfo = vanilla_info.clone();
-  version_info.id = current_info.id.clone();
-  version_info.jar = Some(instance.name.clone());
-  version_info.java_version = current_info.java_version.clone();
-  version_info.client_version = Some(instance.version.clone());
-  version_info.patches = vec![vanilla_info];
+
+  let mut version_info: McClientInfo = current_info.clone();
+  if let Some(ref new_loader) = new_mod_loader {
+    if instance.mod_loader.loader_type != new_loader.loader_type
+      || instance.mod_loader.version != new_loader.version
+    {
+      version_info.patches = vec![vanilla_info.clone()];
+    }
+  }
+
+  let mut modloader_task_params: Vec<PTaskParam> = Vec::new();
+  let mut optifine_task_params: Vec<PTaskParam> = Vec::new();
 
   // install new mod loader
-  let mut task_params: Vec<PTaskParam> = Vec::new();
-  install_mod_loader(
-    app.clone(),
-    &priority_list,
-    &game_version,
-    &mod_loader,
-    libraries_dir.to_path_buf(),
-    mods_dir.to_path_buf(),
-    &mut version_info,
-    &mut task_params,
-    is_install_fabric_api,
-  )
-  .await?;
+  if let Some(ref new_mod_loader) = new_mod_loader {
+    let mod_loader = ModLoader {
+      loader_type: new_mod_loader.loader_type,
+      version: new_mod_loader.version.clone(),
+      status: if matches!(
+        new_mod_loader.loader_type,
+        ModLoaderType::Unknown | ModLoaderType::Fabric | ModLoaderType::Quilt
+      ) {
+        ModLoaderStatus::Installed
+      } else {
+        ModLoaderStatus::NotDownloaded
+      },
+      branch: new_mod_loader.branch.clone(),
+    };
 
-  schedule_progressive_task_group(
-    app.clone(),
-    format!(
-      "change-mod-loader?{} {}",
-      mod_loader.loader_type, mod_loader.version
-    ),
-    task_params,
-    true,
-  )
-  .await?;
+    instance.mod_loader = mod_loader.clone();
+
+    install_mod_loader(
+      app.clone(),
+      &priority_list,
+      &game_version,
+      &mod_loader,
+      libraries_dir.to_path_buf(),
+      mods_dir.to_path_buf(),
+      &mut version_info,
+      &mut modloader_task_params,
+      is_install_fabric_api,
+      is_install_qf_api,
+    )
+    .await?;
+    if new_optifine.is_none() {
+      instance.optifine = original_optifine_config;
+
+      if instance.optifine.is_some() {
+        if let Some(patch) = original_optifine_patch.as_ref() {
+          if !version_info.patches.iter().any(|p| p.id == patch.id) {
+            version_info.patches.push(patch.clone());
+          }
+        }
+      }
+    }
+    if !modloader_task_params.is_empty() {
+      schedule_progressive_task_group(
+        app.clone(),
+        format!(
+          "change-mod-loader?{} {}",
+          instance.mod_loader.loader_type, instance.mod_loader.version
+        ),
+        modloader_task_params,
+        true,
+      )
+      .await?;
+    }
+  } else {
+    instance.optifine = original_optifine_config;
+  }
+
+  // install new OptiFine
+  if let Some(optifine) = new_optifine {
+    let optifine_info = OptiFine {
+      filename: optifine.filename.clone(),
+      version: format!("{}_{}", optifine.r#type, optifine.patch),
+      status: ModLoaderStatus::NotDownloaded,
+    };
+
+    instance.optifine = Some(optifine_info);
+
+    download_optifine_installer(
+      &instance.version,
+      &optifine,
+      libraries_dir.to_path_buf(),
+      &mut optifine_task_params,
+    )
+    .await?;
+
+    if !optifine_task_params.is_empty() {
+      schedule_progressive_task_group(
+        app.clone(),
+        format!("change-optifine?{}", optifine.filename),
+        optifine_task_params,
+        true,
+      )
+      .await?;
+    }
+  } else {
+    instance.optifine = old_optifine;
+
+    if instance.optifine.is_some() {
+      if let Some(patch) = original_optifine_patch {
+        if !version_info.patches.iter().any(|p| p.id == patch.id) {
+          version_info.patches.push(patch);
+        }
+      }
+    }
+  }
 
   save_json_async(&version_info, &json_path).await?;
   instance
@@ -1398,6 +1556,63 @@ pub fn add_custom_instance_icon(
 
   let dest_path = Path::new(&version_path).join("icon");
   fs::copy(source_path, &dest_path)?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn retrieve_exportable_file_list(
+  app: AppHandle,
+  instance_id: String,
+) -> SJMCLResult<ModpackFileList> {
+  let instance = {
+    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+    let state = binding.lock()?;
+    state
+      .get(&instance_id)
+      .ok_or(InstanceError::InstanceNotFoundByID)?
+      .clone()
+  };
+  tokio::task::spawn_blocking(move || list_files(&instance)).await?
+}
+
+#[tauri::command]
+pub async fn export_modpack(
+  app: AppHandle,
+  instance_id: String,
+  save_path: String,
+  options: ExportModpackOptions,
+  files: Vec<String>,
+) -> SJMCLResult<()> {
+  let instance = {
+    let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+    let state = binding.lock()?;
+    state
+      .get(&instance_id)
+      .ok_or(InstanceError::InstanceNotFoundByID)?
+      .clone()
+  };
+  validate_export_options(&instance, &options)?;
+
+  let base_path = instance.version_path.clone();
+
+  let mut selected_files = Vec::new();
+  for rel in files {
+    let full = base_path.join(&rel);
+    if tokio::fs::try_exists(&full).await.unwrap_or(false) {
+      selected_files.push((rel, full));
+    }
+  }
+
+  if selected_files.is_empty() {
+    return Err(InstanceError::ModpackManifestParseError.into());
+  }
+
+  let export_bundle = build_export_bundle(&app, &instance, &options, &selected_files).await?;
+
+  create_modpack_zip(&save_path, export_bundle)
+    .await
+    .map_err(|_| InstanceError::ZipFileProcessFailed)?;
 
   Ok(())
 }

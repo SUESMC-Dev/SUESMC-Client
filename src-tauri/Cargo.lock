@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "SUESMC-Client"
-version = "1.0.0-beta.2-2"
+version = "1.0.0-beta.6-1"
 dependencies = [
  "async-speed-limit",
  "async-trait",
@@ -31,7 +31,7 @@ dependencies = [
  "pin-project",
  "plist",
  "quartz_nbt",
- "rand 0.9.2",
+ "rand 0.9.3",
  "regex",
  "reqwest-middleware",
  "reqwest-retry",
@@ -76,6 +76,7 @@ dependencies = [
  "url",
  "urlencoding",
  "uuid",
+ "walkdir",
  "winapi",
  "winreg 0.55.0",
  "zip",
@@ -388,9 +389,9 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "aws-lc-rs"
-version = "1.15.4"
+version = "1.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b7b6141e96a8c160799cc2d5adecd5cbbe5054cb8c7c4af53da0f83bb7ad256"
+checksum = "a054912289d18629dc78375ba2c3726a3afe3ff71b4edba9dedfca0e3446d1fc"
 dependencies = [
  "aws-lc-sys",
  "untrusted 0.7.1",
@@ -399,9 +400,9 @@ dependencies = [
 
 [[package]]
 name = "aws-lc-sys"
-version = "0.37.0"
+version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c34dda4df7017c8db52132f0f8a2e0f8161649d15723ed63fc00c82d0f2081a"
+checksum = "1fa7e52a4c5c547c741610a2c6f123f3881e409b714cd27e6798ef020c514f0a"
 dependencies = [
  "cc",
  "cmake",
@@ -4381,7 +4382,7 @@ dependencies = [
  "bytes",
  "getrandom 0.3.3",
  "lru-slab",
- "rand 0.9.2",
+ "rand 0.9.3",
  "ring",
  "rustc-hash",
  "rustls",
@@ -4455,9 +4456,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6db2770f06117d490610c7488547d543617b21bfa07796d7a12f6f1bd53850d1"
+checksum = "7ec095654a25171c2124e9e3393a930bddbffdc939556c914957a4c3e0a87166"
 dependencies = [
  "rand_chacha 0.9.0",
  "rand_core 0.9.3",
@@ -4813,7 +4814,7 @@ dependencies = [
  "http-body-util",
  "pastey",
  "pin-project-lite",
- "rand 0.9.2",
+ "rand 0.9.3",
  "rmcp-macros",
  "schemars 1.0.4",
  "serde",
@@ -4976,9 +4977,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.4"
+version = "0.103.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a17884ae0c1b773f1ccd2bd4a8c72f16da897310a98b0e84bf349ad5ead92fc"
+checksum = "61c429a8649f110dddef65e2a5ad240f747e85f7758a6bccc7e5777bd33f756e"
 dependencies = [
  "ring",
  "rustls-pki-types",
@@ -5827,6 +5828,7 @@ dependencies = [
  "heck 0.5.0",
  "http",
  "http-range",
+ "image",
  "jni",
  "libc",
  "log",
@@ -6897,7 +6899,7 @@ checksum = "f33196643e165781c20a5ead5582283a7dacbb87855d867fbc2df3f81eddc1be"
 dependencies = [
  "getrandom 0.3.3",
  "js-sys",
- "rand 0.9.2",
+ "rand 0.9.3",
  "serde",
  "sha1_smol",
  "uuid-macro-internal",

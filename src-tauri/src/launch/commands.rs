@@ -20,9 +20,7 @@ use crate::launch::helpers::process_monitor::{
 };
 use crate::launch::models::{LaunchError, LaunchingState};
 use crate::launcher_config::helpers::java::refresh_and_update_javas;
-use crate::launcher_config::models::{
-  FileValidatePolicy, JavaInfo, LauncherConfig, LauncherVisiablity,
-};
+use crate::launcher_config::models::{FileValidatePolicy, LauncherConfig, LauncherVisiablity};
 use crate::resource::helpers::misc::get_source_priority_list;
 use crate::storage::load_json_async;
 use crate::tasks::commands::schedule_progressive_task_group;
@@ -50,7 +48,6 @@ pub async fn select_suitable_jre(
   app: AppHandle,
   instance_id: String,
   instances_state: State<'_, Mutex<HashMap<String, Instance>>>,
-  javas_state: State<'_, Mutex<Vec<JavaInfo>>>,
   launching_queue_state: State<'_, Mutex<Vec<LaunchingState>>>,
 ) -> SJMCLResult<()> {
   let instance = instances_state
@@ -66,12 +63,10 @@ pub async fn select_suitable_jre(
   let client_info = load_json_async::<McClientInfo>(&client_path).await?;
 
   refresh_and_update_javas(&app).await;
-  let javas = javas_state.lock()?.clone();
 
   let selected_java = select_java_runtime(
     &app,
-    &game_config.game_java,
-    &javas,
+    Some(&game_config.game_java),
     &instance,
     client_info
       .java_version
@@ -218,7 +213,7 @@ pub async fn validate_selected_player(
     let local_ygg_server = local_ygg_server_state.lock()?;
     player.auth_server_url = Some(local_ygg_server.root_url.clone());
     local_ygg_server.apply_player(player.clone());
-    Some(local_ygg_server.metadata.to_string())
+    Some(local_ygg_server.metadata().to_string())
   } else {
     None
   };

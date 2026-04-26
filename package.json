@@ -1,6 +1,6 @@
 {
   "name": "suesmc-client",
-  "version": "1.0.0-beta.2-2",
+  "version": "1.0.0-beta.6-1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -45,10 +45,10 @@
     "@tauri-apps/plugin-process": "^2.3.0",
     "@tauri-apps/plugin-window-state": "^2.3.0",
     "i18next": "^24.0.0",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "masonic": "^4.0.1",
     "micromatch": "^4.0.8",
-    "next": "15.5.14",
+    "next": "15.5.15",
     "react": "^18",
     "react-dom": "^18",
     "react-i18next": "^15.1.1",

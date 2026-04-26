@@ -1,7 +1,8 @@
-import { Center, HStack } from "@chakra-ui/react";
+import { Center, HStack, useDisclosure } from "@chakra-ui/react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LuHaze } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import CountTag from "@/components/common/count-tag";
@@ -11,9 +12,13 @@ import { Section } from "@/components/common/section";
 import SelectableCard, {
   SelectableCardProps,
 } from "@/components/common/selectable-card";
+import { ChangeLoaderModal } from "@/components/modals/change-loader-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
+import { useExtensionHost } from "@/contexts/extension/host";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
+import { ExtensionUISlotKey } from "@/enums/extension";
 import { InstanceSubdirType } from "@/enums/instance";
 import { OtherResourceType } from "@/enums/resource";
 import { GetStateFlag } from "@/hooks/get-state";
@@ -24,16 +29,24 @@ const InstanceShaderPacksPage = () => {
   const { config, update } = useLauncherConfig();
   const { t } = useTranslation();
   const {
+    instanceId,
     summary,
     openInstanceSubdir,
     handleImportResource,
     getShaderPackList,
     isShaderPackListLoading: isLoading,
   } = useInstanceSharedData();
+  const { getExtensionSlotItems } = useExtensionHost();
   const { openSharedModal } = useSharedModals();
   const accordionStates = config.states.instanceShaderPacksPage.accordionStates;
 
   const [shaderPacks, setShaderPacks] = useState<ShaderPackInfo[]>([]);
+
+  const {
+    isOpen: isChangeLoaderModalOpen,
+    onOpen: onChangeLoaderModalOpen,
+    onClose: onChangeLoaderModalClose,
+  } = useDisclosure();
 
   const getShaderPackListWrapper = useCallback(
     (sync?: boolean) => {
@@ -50,6 +63,22 @@ const InstanceShaderPacksPage = () => {
   useEffect(() => {
     getShaderPackListWrapper();
   }, [getShaderPackListWrapper]);
+
+  useFileDnD({
+    extensions: ["zip"],
+    titleKey: "InstanceShaderPacksPage.fileDnD.title",
+    descKey: "InstanceShaderPacksPage.fileDnD.desc",
+    icon: LuHaze,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
+        filterExt: ["zip"],
+        tgtDirType: InstanceSubdirType.ShaderPacks,
+        path,
+        onSuccessCallback: () => getShaderPackListWrapper(true),
+      });
+    },
+  });
 
   useEffect(() => {
     const unlisten = ResourceService.onResourceRefresh(
@@ -84,7 +113,6 @@ const InstanceShaderPacksPage = () => {
           filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
           filterExt: ["zip"],
           tgtDirType: InstanceSubdirType.ShaderPacks,
-          decompress: false,
           onSuccessCallback: () => getShaderPackListWrapper(true),
         });
       },
@@ -96,6 +124,14 @@ const InstanceShaderPacksPage = () => {
   ];
 
   const shaderItemMenuOperations = (pack: ShaderPackInfo) => [
+    ...getExtensionSlotItems(
+      ExtensionUISlotKey.InstanceShaderPackItemMenuOperations,
+      {
+        pack,
+        instanceId,
+        summary,
+      }
+    ),
     {
       label: "",
       icon: "copyOrMove",
@@ -123,10 +159,11 @@ const InstanceShaderPacksPage = () => {
           : t("InstanceShaderPacksPage.shaderLoaderList.notInstalled"),
       displayMode: "entry",
       isSelected: summary?.optifine?.status === "Installed",
-      onSelect: () => {},
-      // TODO: add OptiFine installation support
-      isDisabled: true,
-      isChevronShown: false,
+      onSelect: () => {
+        onChangeLoaderModalOpen();
+      },
+      isDisabled: false,
+      isChevronShown: true,
     },
   ];
 
@@ -207,6 +244,11 @@ const InstanceShaderPacksPage = () => {
           <Empty withIcon={false} size="sm" />
         )}
       </Section>
+      <ChangeLoaderModal
+        isOpen={isChangeLoaderModalOpen}
+        onClose={onChangeLoaderModalClose}
+        mode="optifine"
+      />
     </>
   );
 };

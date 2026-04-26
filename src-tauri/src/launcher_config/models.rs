@@ -71,6 +71,18 @@ pub enum LauncherVisiablity {
   Always,
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum GarbageCollector {
+  G1gc,
+  Zgc,
+  Shenandoah,
+  Parallel,
+  Serial,
+  #[serde(other)]
+  Auto,
+}
+
 // Partial Derive is used for these structs and we can use it for key value storage.
 // And partially update some fields for better performance and hygiene.
 //
@@ -93,9 +105,9 @@ structstruck::strike! {
     },
     pub game_window: struct {
       pub resolution: struct {
-        #[default = 1280]
+        #[default = 854]
         pub width: u32,
-        #[default = 720]
+        #[default = 480]
         pub height: u32,
         pub fullscreen: bool,
       },
@@ -130,16 +142,20 @@ structstruck::strike! {
         pub post_exit_command: String,
       },
       pub jvm: struct {
-        pub args: String,
+        #[default(GarbageCollector::Auto)]
+        pub garbage_collector: GarbageCollector,
         pub java_permanent_generation_space: u32,
         pub environment_variable: String,
+        pub args: String,
       },
-      pub workaround: struct {
+      pub workaround: struct GameWorkaroundConfig {
         pub no_jvm_args: bool,
         #[default(FileValidatePolicy::Normal)]
         pub game_file_validate_policy: FileValidatePolicy,
         pub dont_check_jvm_validity: bool,
         pub dont_patch_natives: bool,
+        #[default = true]
+        pub use_lwjgl_unsafe_agent: bool,
         pub use_native_glfw: bool,
         pub use_native_openal: bool,
       },
@@ -198,7 +214,7 @@ structstruck::strike! {
         #[default = "light"]
         pub color_mode: String,
         pub use_liquid_glass_design: bool,
-        #[default = "standard"]
+        #[default = "adaptive"]
         pub head_nav_style: String,
       },
       pub font: struct {
@@ -251,10 +267,14 @@ structstruck::strike! {
         pub language: String,
       },
       pub functionality: struct {
+        #[default = "on"]
+        pub discover_page: String,
         #[default = "instance"]
         pub instances_nav_type: String,
         #[default = true]
         pub launch_page_quick_switch: bool,
+        #[default = true]
+        pub auto_download_java: bool,
         #[default = true]
         pub resource_translation: bool, // only available in zh-Hans
         #[default = true]
@@ -267,7 +287,7 @@ structstruck::strike! {
         pub auto_purge_launcher_logs: bool,
       }
     },
-    pub intelligence: struct Intelligence {
+    pub intelligence: struct IntelligenceConfig {
       pub mcp_server: struct {
         pub launcher: struct LauncherMcpServerConfig{
           #[default = true]
@@ -276,6 +296,11 @@ structstruck::strike! {
           pub port: u16,
         },
       }
+    },
+    pub extension: struct ExtensionConfig {
+      pub enabled: Vec<String>,
+      #[serde(default)]
+      pub home_widget_state: Vec<(String, u32, bool)>,  // widget_key, width, collapsed
     },
     pub global_game_config: GameConfig,
     pub local_game_directories: Vec<GameDirectory>,
@@ -323,7 +348,7 @@ structstruck::strike! {
       pub instance_shader_packs_page: struct {
         #[default([true, true])]
         pub accordion_states: [bool; 2],
-      }
+      },
     }
   }
 }
