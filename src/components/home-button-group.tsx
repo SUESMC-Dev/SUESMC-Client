@@ -211,11 +211,10 @@ const HomeButtonGroup = () => {
                 label={t("LaunchPage.button.instanceSettings")}
                 tooltipPlacement="top"
                 onClick={() =>
-                  router.push(
-                    `/instances/details/${encodeURIComponent(
-                      selectedInstance.id
-                    )}/settings`
-                  )
+                  router.push({
+                    pathname: "/instances/details/[id]/settings",
+                    query: { id: selectedInstance.id },
+                  })
                 }
               />
             )}

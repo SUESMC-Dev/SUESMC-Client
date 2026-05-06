@@ -264,7 +264,7 @@ export const defaultConfig: LauncherConfig = {
     background: {
       choice: "%built-in:SUES-Library",
       randomCustom: false,
-      autoDarken: true,
+      autoDarken: false,
     },
     accessibility: {
       invertColors: false,

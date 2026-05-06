@@ -2260,7 +2260,14 @@
             "NOT_FOUND": "认证服务器不存在",
             "CANCELLED": "已取消",
             "INVALID": "无效的认证服务器地址",
-            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft 并创建角色"
+            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft 并创建角色",
+            "XSTS_BANNED": "您的账号已被 Xbox 封禁",
+            "XSTS_PARENTAL_RESTRICTION": "您的账号受到家长管控限制",
+            "XSTS_NO_XBOX_ACCOUNT": "您的微软账号未关联 Xbox 账号，请前往 minecraft.net 创建",
+            "XSTS_TERMS_NOT_ACCEPTED": "您需要接受 Xbox 服务条款才能继续",
+            "XSTS_REGION_BANNED": "您所在的国家或地区不受 Xbox Live 支持",
+            "XSTS_CHILD_ACCOUNT": "您的账号为未成年账号，请前往 family.microsoft.com 进行家长授权",
+            "XSTS_UNKNOWN_ERROR": "XSTS 验证时发生未知错误"
           }
         }
       },
@@ -2275,7 +2282,14 @@
             "NETWORK_ERROR": "无法连接至认证服务器",
             "INVALID": "不支持离线角色刷新",
             "CANCELLED": "已取消",
-            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft 并创建角色"
+            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft 并创建角色",
+            "XSTS_BANNED": "您的账号已被 Xbox 封禁",
+            "XSTS_PARENTAL_RESTRICTION": "您的账号受到家长管控限制",
+            "XSTS_NO_XBOX_ACCOUNT": "您的微软账号未关联 Xbox 账号，请前往 minecraft.net 创建",
+            "XSTS_TERMS_NOT_ACCEPTED": "您需要接受 Xbox 服务条款才能继续",
+            "XSTS_REGION_BANNED": "您所在的国家或地区不受 Xbox Live 支持",
+            "XSTS_CHILD_ACCOUNT": "您的账号为未成年账号，请前往 family.microsoft.com 进行家长授权",
+            "XSTS_UNKNOWN_ERROR": "XSTS 验证时发生未知错误"
           }
         }
       },
@@ -2487,6 +2501,14 @@
             "PARSE_ERROR": "服务器返回数据格式错误",
             "NETWORK_ERROR": "无法连接到服务器",
             "NO_DOWNLOAD_API": "无可用的下载策略，请检查网络连接"
+          }
+        }
+      },
+      "fetchOptiFineVersionList": {
+        "error": {
+          "title": "获取 OptiFine 列表失败",
+          "description": {
+            "NETWORK_ERROR": "无法连接到服务器"
           }
         }
       },

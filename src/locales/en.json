@@ -2260,7 +2260,14 @@
             "NOT_FOUND": "The authentication server does not exist",
             "CANCELLED": "OAuth login cancelled",
             "INVALID": "The server type is invalid",
-            "NO_MINECRAFT_PROFILE": "No Minecraft profile found"
+            "NO_MINECRAFT_PROFILE": "No Minecraft profile found",
+            "XSTS_BANNED": "Your account has been banned from Xbox services",
+            "XSTS_PARENTAL_RESTRICTION": "Your account is blocked by parental controls",
+            "XSTS_NO_XBOX_ACCOUNT": "Your Microsoft account is not linked to an Xbox account, please visit minecraft.net to set one up",
+            "XSTS_TERMS_NOT_ACCEPTED": "You need to accept the Xbox Terms of Service before continuing",
+            "XSTS_REGION_BANNED": "Your account is from a country or region where Xbox Live is not available",
+            "XSTS_CHILD_ACCOUNT": "Your account is a minor account and requires parental consent, please visit family.microsoft.com to authorize",
+            "XSTS_UNKNOWN_ERROR": "An unknown XSTS authentication error occurred"
           }
         }
       },
@@ -2275,7 +2282,14 @@
             "NETWORK_ERROR": "Failed to connect to the server",
             "INVALID": "The player type is invalid",
             "CANCELLED": "OAuth re-login cancelled",
-            "NO_MINECRAFT_PROFILE": "No Minecraft profile found"
+            "NO_MINECRAFT_PROFILE": "No Minecraft profile found",
+            "XSTS_BANNED": "Your account has been banned from Xbox services",
+            "XSTS_PARENTAL_RESTRICTION": "Your account is blocked by parental controls",
+            "XSTS_NO_XBOX_ACCOUNT": "Your Microsoft account is not linked to an Xbox account, please visit minecraft.net to set one up",
+            "XSTS_TERMS_NOT_ACCEPTED": "You need to accept the Xbox Terms of Service before continuing",
+            "XSTS_REGION_BANNED": "Your account is from a country or region where Xbox Live is not available",
+            "XSTS_CHILD_ACCOUNT": "Your account is a minor account and requires parental consent, please visit family.microsoft.com to authorize",
+            "XSTS_UNKNOWN_ERROR": "An unknown XSTS authentication error occurred"
           }
         }
       },
@@ -2487,6 +2501,14 @@
             "PARSE_ERROR": "The server returned data in an incorrect format",
             "NETWORK_ERROR": "Failed to connect to the server",
             "NO_DOWNLOAD_API": "No download strategy available, please check internet connection"
+          }
+        }
+      },
+      "fetchOptiFineVersionList": {
+        "error": {
+          "title": "Failed to fetch OptiFine version list",
+          "description": {
+            "NETWORK_ERROR": "Failed to connect to the server"
           }
         }
       },

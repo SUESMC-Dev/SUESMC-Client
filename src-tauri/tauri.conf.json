@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "SUESMC-Client",
-  "version": "1.0.0-beta.6-3",
+  "version": "1.0.0",
   "identifier": "ltd.suesmc.client",
   "build": {
     "frontendDist": "../out",
@@ -27,7 +27,6 @@
     "targets": [
       "deb",
       "rpm",
-      "appimage",
       "nsis",
       "app"
     ],
