@@ -1,8 +1,9 @@
-use crate::tasks::streams::reporter::Sink;
-use crate::tasks::{PTaskDesc, THandle};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
 use tokio::time::Duration;
+
+use crate::tasks::streams::reporter::Sink;
+use crate::tasks::{PTaskDesc, THandle};
 
 const TASK_PROGRESS_UPDATE_EVENT: &str = "task:progress-update";
 const TASK_GROUP_UPDATE_EVENT: &str = "task:group-update";
@@ -211,7 +212,7 @@ impl Sink for TauriEventSink {
     task_id: u32,
     task_group: Option<&str>,
     current: i64,
-    total: i64,
+    _total: i64,
     percentage: u32,
     estimated_time: Option<f64>,
     speed: f64,

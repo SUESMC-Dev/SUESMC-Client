@@ -9,7 +9,6 @@
   transition: box-shadow 0.2s ease;
 }
 
-
 .launch-button:hover {
   box-shadow: 
     -2px 0 5px 2px rgba(120, 120, 120, 0.2),
@@ -27,6 +26,18 @@
 .selected-user-card {
   height: 4.5rem !important;
   width: 10.5rem !important;
+}
+
+.selected-user-card[data-liquid="false"] {
   backdrop-filter: blur(7px);
-  padding: var(--chakra-space-3);
+}
+
+.launch-button[data-liquid="true"],
+.launch-button[data-liquid="true"]:hover,
+.launch-button[data-liquid="true"]:active {
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--chakra-radii-xl);
+  background: transparent;
+  backdrop-filter: none;
 }

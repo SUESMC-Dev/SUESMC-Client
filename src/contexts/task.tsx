@@ -463,6 +463,7 @@ export const TaskContextProvider: React.FC<{ children: React.ReactNode }> = ({
                 getJavaInfos(true);
                 break;
               case "forge-libraries":
+              case "cleanroom-libraries":
               case "neoforge-libraries":
                 if (params.param || params.param1) {
                   const instanceId = params.param || params.param1;
@@ -567,16 +568,16 @@ export const TaskContextProvider: React.FC<{ children: React.ReactNode }> = ({
                   (t) => t.taskGroup === payload.taskGroup
                 );
                 if (group && group.taskDescs.length > 0) {
-                  const isMSI =
+                  const isWinInstaller =
                     config.basicInfo.osType === "windows" &&
                     !config.basicInfo.isPortable;
                   openGenericConfirmDialog({
                     title: t("RestartForUpdateConfirmDialog.title"),
                     body: t(
-                      `RestartForUpdateConfirmDialog.${isMSI ? "bodyMSI" : "body"}`
+                      `RestartForUpdateConfirmDialog.${isWinInstaller ? "bodyWinInstaller" : "body"}`
                     ),
                     btnOK: t(
-                      `RestartForUpdateConfirmDialog.button.${isMSI ? "install" : "restart"}`
+                      `RestartForUpdateConfirmDialog.button.${isWinInstaller ? "install" : "restart"}`
                     ),
                     btnCancel: t("RestartForUpdateConfirmDialog.button.later"),
                     onOKCallback: () => {

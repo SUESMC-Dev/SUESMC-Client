@@ -1,17 +1,16 @@
-use crate::error::SJMCLResult;
+use sjmcl_types::error::{SJMCLError, SJMCLResult};
+use std::cmp::Ordering;
+use std::collections::HashSet;
+use std::path::{Path, PathBuf};
+use strum::IntoEnumIterator;
+use url::Url;
+
 use crate::launcher_config::models::LauncherConfig;
-use crate::resource::helpers::curseforge::misc::translate_description_curseforge;
-use crate::resource::helpers::mod_db::ModDataBase;
-use crate::resource::helpers::modrinth::misc::translate_description_modrinth;
 use crate::resource::models::{
-  OtherResourceInfo, OtherResourceSource, OtherResourceVersionPack, ResourceError, ResourceType,
+  ModUpdateQuery, OtherResourceInfo, OtherResourceVersionPack, ResourceError, ResourceType,
   SourceType,
 };
-use std::cmp::Ordering;
-use std::sync::Mutex;
-use strum::IntoEnumIterator;
-use tauri::{AppHandle, Manager};
-use url::Url;
+use crate::utils::string::contains_chinese;
 
 pub fn get_source_priority_list(launcher_config: &LauncherConfig) -> Vec<SourceType> {
   match launcher_config.download.source.strategy.as_str() {
@@ -29,53 +28,102 @@ pub fn get_source_priority_list(launcher_config: &LauncherConfig) -> Vec<SourceT
 pub fn get_download_api(source: SourceType, resource_type: ResourceType) -> SJMCLResult<Url> {
   match source {
     SourceType::Official => match resource_type {
-      ResourceType::VersionManifest => Ok(Url::parse("https://launchermeta.mojang.com/mc/game/version_manifest.json")?),
-      ResourceType::VersionManifestV2 => Ok(Url::parse("https://launchermeta.mojang.com/mc/game/version_manifest_v2.json")?),
+      ResourceType::VersionManifest => Ok(Url::parse(
+        "https://launchermeta.mojang.com/mc/game/version_manifest.json",
+      )?),
+      ResourceType::VersionManifestV2 => Ok(Url::parse(
+        "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json",
+      )?),
       ResourceType::LauncherMeta => Ok(Url::parse("https://launchermeta.mojang.com/")?),
       ResourceType::Launcher => Ok(Url::parse("https://launcher.mojang.com/")?),
       ResourceType::Assets => Ok(Url::parse("https://resources.download.minecraft.net/")?),
       ResourceType::Libraries => Ok(Url::parse("https://libraries.minecraft.net/")?),
-      ResourceType::MojangJava => Ok(Url::parse("https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json")?),
+      ResourceType::MojangJava => Ok(Url::parse(
+        "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json",
+      )?),
       ResourceType::ForgeMaven => Ok(Url::parse("https://files.minecraftforge.net/maven/")?),
       ResourceType::ForgeMavenNew => Ok(Url::parse("https://maven.minecraftforge.net")?),
-      ResourceType::ForgeInstall => Ok(Url::parse("https://maven.minecraftforge.net/net/minecraftforge/forge/")?),
+      ResourceType::ForgeInstall => Ok(Url::parse(
+        "https://maven.minecraftforge.net/net/minecraftforge/forge/",
+      )?),
       ResourceType::ForgeMeta => Err(ResourceError::NoDownloadApi.into()), // https://github.com/HMCL-dev/HMCL/pull/3259/files
-      ResourceType::Liteloader => Ok(Url::parse("https://dl.liteloader.com/versions/versions.json")?),
-      ResourceType::OptiFine => Err(ResourceError::NoDownloadApi.into()), // 
+      ResourceType::Liteloader => Ok(Url::parse(
+        "https://dl.liteloader.com/versions/versions.json",
+      )?),
+      ResourceType::OptiFine => Err(ResourceError::NoDownloadApi.into()), //
       ResourceType::AuthlibInjector => Ok(Url::parse("https://authlib-injector.yushi.moe/")?),
       ResourceType::FabricMeta => Ok(Url::parse("https://meta.fabricmc.net/")?),
       ResourceType::FabricMaven => Ok(Url::parse("https://maven.fabricmc.net/")?),
       // https://github.com/HMCL-dev/HMCL/blob/efd088e014bf1c113f7b3fdf73fb983087ae3f5e/HMCLCore/src/main/java/org/jackhuang/hmcl/download/neoforge/NeoForgeOfficialVersionList.java#L28
-      ResourceType::NeoforgeMetaForge => Ok(Url::parse("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/forge/")?),
-      ResourceType::NeoforgeMetaNeoforge => Ok(Url::parse("https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge/")?),
-      ResourceType::NeoforgeMaven | ResourceType::NeoforgeInstall => Ok(Url::parse("https://maven.neoforged.net/releases/")?),
+      ResourceType::NeoforgeMetaForge => Ok(Url::parse(
+        "https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/forge/",
+      )?),
+      ResourceType::NeoforgeMetaNeoforge => Ok(Url::parse(
+        "https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge/",
+      )?),
+      ResourceType::NeoforgeMaven | ResourceType::NeoforgeInstall => {
+        Ok(Url::parse("https://maven.neoforged.net/releases/")?)
+      }
       ResourceType::QuiltMaven => Ok(Url::parse("https://maven.quiltmc.org/repository/release/")?),
       ResourceType::QuiltMeta => Ok(Url::parse("https://meta.quiltmc.org/")?),
+      ResourceType::CleanroomInstall => Ok(Url::parse(
+        "https://hmcl.glavo.site/metadata/cleanroom/files/",
+      )?),
+      ResourceType::CleanroomMaven => Ok(Url::parse("https://maven.cleanroommc.com/")?),
+      ResourceType::CleanroomMeta => Ok(Url::parse(
+        "https://hmcl.glavo.site/metadata/cleanroom/index.json",
+      )?),
     },
     SourceType::BMCLAPIMirror => match resource_type {
-      ResourceType::VersionManifest => Ok(Url::parse("https://bmclapi2.bangbang93.com/mc/game/version_manifest.json")?),
-      ResourceType::VersionManifestV2 => Ok(Url::parse("https://bmclapi2.bangbang93.com/mc/game/version_manifest_v2.json")?),
+      ResourceType::VersionManifest => Ok(Url::parse(
+        "https://bmclapi2.bangbang93.com/mc/game/version_manifest.json",
+      )?),
+      ResourceType::VersionManifestV2 => Ok(Url::parse(
+        "https://bmclapi2.bangbang93.com/mc/game/version_manifest_v2.json",
+      )?),
       ResourceType::LauncherMeta => Ok(Url::parse("https://bmclapi2.bangbang93.com/")?),
       ResourceType::Launcher => Ok(Url::parse("https://bmclapi2.bangbang93.com/")?),
       ResourceType::Assets => Ok(Url::parse("https://bmclapi2.bangbang93.com/assets/")?),
       ResourceType::Libraries => Ok(Url::parse("https://bmclapi2.bangbang93.com/maven/")?),
-      ResourceType::MojangJava => Ok(Url::parse("https://bmclapi2.bangbang93.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json")?),
-      ResourceType::ForgeMaven | ResourceType::ForgeMavenNew | ResourceType::NeoforgeMaven => Ok(Url::parse("https://bmclapi2.bangbang93.com/maven/")?),
-      ResourceType::ForgeInstall => Ok(Url::parse("https://bmclapi2.bangbang93.com/forge/download/")?),
+      ResourceType::MojangJava => Ok(Url::parse(
+        "https://bmclapi2.bangbang93.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json",
+      )?),
+      ResourceType::ForgeMaven | ResourceType::ForgeMavenNew | ResourceType::NeoforgeMaven => {
+        Ok(Url::parse("https://bmclapi2.bangbang93.com/maven/")?)
+      }
+      ResourceType::ForgeInstall => Ok(Url::parse(
+        "https://bmclapi2.bangbang93.com/forge/download/",
+      )?),
       ResourceType::ForgeMeta => Ok(Url::parse("https://bmclapi2.bangbang93.com/forge/")?),
-      ResourceType::Liteloader => Ok(Url::parse("https://bmclapi.bangbang93.com/maven/com/mumfrey/liteloader/versions.json")?),
-      ResourceType::AuthlibInjector => Ok(Url::parse("https://bmclapi2.bangbang93.com/mirrors/authlib-injector/")?),
+      ResourceType::Liteloader => Ok(Url::parse(
+        "https://bmclapi.bangbang93.com/maven/com/mumfrey/liteloader/versions.json",
+      )?),
+      ResourceType::AuthlibInjector => Ok(Url::parse(
+        "https://bmclapi2.bangbang93.com/mirrors/authlib-injector/",
+      )?),
       ResourceType::FabricMeta => Ok(Url::parse("https://bmclapi2.bangbang93.com/fabric-meta/")?),
       ResourceType::FabricMaven => Ok(Url::parse("https://bmclapi2.bangbang93.com/maven/")?),
-      ResourceType::NeoforgeMetaForge | ResourceType::NeoforgeMetaNeoforge => Ok(Url::parse("https://bmclapi2.bangbang93.com/neoforge/")?),
-      ResourceType::NeoforgeInstall => Ok(Url::parse("https://bmclapi2.bangbang93.com/neoforge/version/")?),
+      ResourceType::NeoforgeMetaForge | ResourceType::NeoforgeMetaNeoforge => {
+        Ok(Url::parse("https://bmclapi2.bangbang93.com/neoforge/")?)
+      }
+      ResourceType::NeoforgeInstall => Ok(Url::parse(
+        "https://bmclapi2.bangbang93.com/neoforge/version/",
+      )?),
       ResourceType::OptiFine => Ok(Url::parse("https://bmclapi2.bangbang93.com/optifine/")?),
       ResourceType::QuiltMaven => Ok(Url::parse("https://bmclapi2.bangbang93.com/maven/")?),
-      ResourceType::QuiltMeta => Ok(Url::parse("https://bmclapi2.bangbang93.com/quilt-meta/")?),// seems 'not found' 
+      ResourceType::QuiltMeta => Ok(Url::parse("https://bmclapi2.bangbang93.com/quilt-meta/")?), // seems 'not found'
+      ResourceType::CleanroomInstall => Ok(Url::parse(
+        "https://alist.8mi.tech/d/mirror/HMCL-Metadata/Auto/cleanroom/files/",
+      )?),
+      ResourceType::CleanroomMaven => Ok(Url::parse("https://maven.cleanroommc.com/")?),
+      ResourceType::CleanroomMeta => Ok(Url::parse(
+        "https://alist.8mi.tech/d/mirror/HMCL-Metadata/Auto/cleanroom/index.json",
+      )?),
     },
   }
 }
 
+#[expect(dead_code, reason = "reserved for future use")]
 pub fn convert_url_source_type(
   url: &Url,
   resource_type: &ResourceType,
@@ -119,11 +167,11 @@ pub fn convert_url_to_target_source(
         continue;
       }
 
-      if let Ok(src_api) = get_download_api(src_type, resource_type) {
-        if url_str.starts_with(src_api.as_str()) {
-          let new_url_str = url_str.replacen(src_api.as_str(), dst_api.as_str(), 1);
-          return Ok(Url::parse(&new_url_str)?);
-        }
+      if let Ok(src_api) = get_download_api(src_type, resource_type)
+        && url_str.starts_with(src_api.as_str())
+      {
+        let new_url_str = url_str.replacen(src_api.as_str(), dst_api.as_str(), 1);
+        return Ok(Url::parse(&new_url_str)?);
       }
     }
   }
@@ -182,46 +230,144 @@ pub fn version_pack_sort(a: &OtherResourceVersionPack, b: &OtherResourceVersionP
   compare_versions_with_suffix(&version_a, &suffix_a, &version_b, &suffix_b).reverse()
 }
 
-pub async fn apply_other_resource_enhancements(
-  app: &AppHandle,
-  resource_info: &mut OtherResourceInfo,
-) -> SJMCLResult<()> {
-  // Extract data from cache in a limited scope to avoid holding lock across await
-  let (translated_name, mcmod_id) = {
-    if let Ok(cache) = app.state::<Mutex<ModDataBase>>().lock() {
-      let translated_name = if resource_info._type == "mod" {
-        cache.get_translated_name(&resource_info.slug, &resource_info.source)
-      } else {
-        None
-      };
-      let mcmod_id = cache.get_mcmod_id(&resource_info.slug, &resource_info.source);
-      (translated_name, mcmod_id)
+pub(crate) fn levenshtein_distance(a: &str, b: &str) -> usize {
+  let b_chars: Vec<char> = b.chars().collect();
+  let mut prev: Vec<usize> = (0..=b_chars.len()).collect();
+
+  for (i, a_ch) in a.chars().enumerate() {
+    let mut current = Vec::with_capacity(b_chars.len() + 1);
+    current.push(i + 1);
+
+    for (j, b_ch) in b_chars.iter().enumerate() {
+      let cost = if a_ch == *b_ch { 0 } else { 1 };
+      let insertion = current[j] + 1;
+      let deletion = prev[j + 1] + 1;
+      let substitution = prev[j] + cost;
+      current.push(insertion.min(deletion).min(substitution));
+    }
+
+    prev = current;
+  }
+
+  *prev.last().unwrap_or(&0)
+}
+
+pub fn sort_localized_search_results(list: &mut Vec<OtherResourceInfo>, search_query: &str) {
+  const CONTAIN_CHINESE_WEIGHT: i64 = 10;
+
+  let search_query = search_query
+    .split_whitespace()
+    .collect::<Vec<_>>()
+    .join(" ");
+
+  if search_query.is_empty() {
+    return;
+  }
+
+  let mut translated_results = Vec::new();
+  let mut untranslated_results = Vec::new();
+
+  for resource in list.drain(..) {
+    let contains_chinese_title = resource
+      .translated_name
+      .as_deref()
+      .map_or_else(|| contains_chinese(&resource.name), contains_chinese);
+
+    if contains_chinese_title {
+      translated_results.push(resource);
     } else {
-      (None, None)
-    }
-  };
-
-  if let Some(name) = translated_name {
-    if name.chars().any(|c| matches!(c, '\u{4e00}'..='\u{9fbb}')) {
-      resource_info.translated_name = Some(name);
+      untranslated_results.push(resource);
     }
   }
-  if let Some(id) = mcmod_id {
-    resource_info.mcmod_id = id;
-  }
 
-  // Get translated description
-  let translated_desc = match resource_info.source {
-    OtherResourceSource::Modrinth => translate_description_modrinth(app, &resource_info.id).await?,
-    OtherResourceSource::CurseForge => {
-      translate_description_curseforge(app, &resource_info.id).await?
+  translated_results.sort_by_key(|resource| {
+    let display_name = resource
+      .translated_name
+      .as_deref()
+      .unwrap_or(resource.name.as_str());
+
+    let mut diff = levenshtein_distance(&search_query, display_name) as i64;
+    for ch in search_query.chars() {
+      if display_name.contains(ch) {
+        diff -= CONTAIN_CHINESE_WEIGHT;
+      }
     }
-    _ => None,
-  };
 
-  if let Some(desc) = translated_desc {
-    resource_info.translated_description = Some(desc);
+    diff
+  });
+
+  list.extend(translated_results);
+  list.extend(untranslated_results);
+}
+
+pub fn resolve_mod_update_paths(
+  mods_dir: &Path,
+  queries: &[ModUpdateQuery],
+) -> SJMCLResult<Vec<(PathBuf, PathBuf)>> {
+  let canonical_mods_dir = mods_dir.canonicalize().map_err(|error| {
+    SJMCLError(format!(
+      "Failed to resolve mods directory {}: {}",
+      mods_dir.display(),
+      error
+    ))
+  })?;
+  let mut targets = HashSet::new();
+  let mut paths = Vec::with_capacity(queries.len());
+
+  for query in queries {
+    let old_file_path = PathBuf::from(&query.old_file_path);
+    if !old_file_path.is_file() {
+      return Err(SJMCLError(format!(
+        "Old mod file does not exist: {}",
+        old_file_path.display()
+      )));
+    }
+
+    let old_parent = old_file_path.parent().ok_or_else(|| {
+      SJMCLError(format!(
+        "Old mod file has no parent directory: {}",
+        old_file_path.display()
+      ))
+    })?;
+    let canonical_old_parent = old_parent.canonicalize().map_err(|error| {
+      SJMCLError(format!(
+        "Failed to resolve old mod directory {}: {}",
+        old_parent.display(),
+        error
+      ))
+    })?;
+    if !canonical_old_parent.starts_with(&canonical_mods_dir) {
+      return Err(SJMCLError(format!(
+        "Old mod file is outside the instance mods directory: {}",
+        old_file_path.display()
+      )));
+    }
+
+    let new_file_name = Path::new(&query.file_name);
+    if new_file_name.file_name() != Some(new_file_name.as_os_str()) {
+      return Err(SJMCLError(format!(
+        "Invalid mod update file name: {}",
+        query.file_name
+      )));
+    }
+
+    let new_file_path = old_parent.join(new_file_name);
+    let canonical_target = canonical_old_parent.join(new_file_name);
+    if !targets.insert(canonical_target) {
+      return Err(SJMCLError(format!(
+        "Duplicate mod update target: {}",
+        new_file_path.display()
+      )));
+    }
+    if new_file_path != old_file_path && new_file_path.exists() {
+      return Err(SJMCLError(format!(
+        "Mod update target already exists: {}",
+        new_file_path.display()
+      )));
+    }
+
+    paths.push((old_file_path, new_file_path));
   }
 
-  Ok(())
+  Ok(paths)
 }

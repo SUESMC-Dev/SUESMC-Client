@@ -25,9 +25,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+          run_install: false
       
       - name: Check version consistency
-        run: npm run version check
+        run: pnpm run version check
 
       - name: Check Tag Version
         id: check-tag
@@ -188,12 +193,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.Version-Check.outputs.version }}
         run: |
-          RELEASE_TAG="${{ env.VERSION }}"
-          
           # Create the release
           gh release create "$GITHUB_REF_NAME" \
             --title "SUESMC Client ${{ env.VERSION }}" \
             --draft \
-            $PRERELEASE \
             --notes-file release-notes.md \
             ./release-artifacts/*

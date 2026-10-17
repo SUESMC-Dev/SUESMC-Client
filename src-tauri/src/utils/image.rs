@@ -1,6 +1,6 @@
 use base64::Engine;
 use image::codecs::png::PngEncoder;
-use image::imageops::{resize, FilterType};
+use image::imageops::{FilterType, resize};
 use image::{ImageEncoder, ImageError, ImageReader, RgbaImage};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fs;
@@ -98,7 +98,7 @@ impl ImageWrapper {
   ///
   /// # Examples
   ///
-  /// ```rust
+  /// ```rust,ignore
   /// let resized_img = img_wrapper.resized(100, 100, FilterType::Nearest);
   /// ```
   pub fn resized(&self, new_width: u32, new_height: u32, filter: FilterType) -> ImageWrapper {
@@ -115,7 +115,7 @@ impl ImageWrapper {
   ///
   /// # Examples
   ///
-  /// ```rust
+  /// ```rust,ignore
   /// let scaled_img = img_wrapper.scaled(0.5, FilterType::Nearest);
   /// ```
   pub fn scaled(&self, scale: f32, filter: FilterType) -> ImageWrapper {

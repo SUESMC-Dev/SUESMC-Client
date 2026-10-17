@@ -7,7 +7,8 @@
         "languages": [
           "English",
           "SimpChinese"
-        ]
+        ],
+        "sidebarImage": "assets/misc/nsis_sidebar.bmp"
       }
     }
   },
@@ -16,7 +17,7 @@
     "windows": [
       {
         "label": "main",
-        "title": " ",
+        "title": "SJMC Launcher",
         "url": "/",
         "width": 820,
         "height": 550,
@@ -36,6 +37,7 @@
         "minWidth": 640,
         "minHeight": 440,
         "center": true,
+        "decorations": false,
         "dragDropEnabled": false
       },
       {
@@ -48,6 +50,7 @@
         "minWidth": 640,
         "minHeight": 440,
         "center": true,
+        "decorations": false,
         "dragDropEnabled": false
       }
     ]

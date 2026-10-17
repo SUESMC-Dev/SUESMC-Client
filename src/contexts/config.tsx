@@ -1,4 +1,6 @@
 import { ColorModeScript, useColorMode } from "@chakra-ui/react";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { appDataDir } from "@tauri-apps/api/path";
 import i18n from "i18next";
 import React, {
   createContext,
@@ -9,13 +11,14 @@ import React, {
 } from "react";
 import { useToast } from "@/contexts/toast";
 import { useGetState } from "@/hooks/get-state";
+import { localeResources } from "@/locales";
 import {
   LauncherConfig,
   VersionMetaInfo,
   defaultConfig,
   defaultVersionMetaInfo,
 } from "@/models/config";
-import { JavaInfo } from "@/models/system-info";
+import { JavaInfo } from "@/models/misc";
 import { ConfigService } from "@/services/config";
 import { updateByKeyPath } from "@/utils/partial";
 
@@ -24,6 +27,8 @@ interface LauncherConfigContextType {
   setConfig: React.Dispatch<React.SetStateAction<LauncherConfig>>;
   update: (path: string, value: any) => void;
   isZh: boolean; // value shortcut, true if language is zh-Hans / zh-Hant / lzh
+  bgImageSrc: string;
+  isBgDarken: boolean;
   newerVersion: VersionMetaInfo;
   // other shared data associated with the launcher config.
   getJavaInfos: (sync?: boolean) => JavaInfo[] | undefined;
@@ -46,6 +51,10 @@ export const LauncherConfigContextProvider: React.FC<{
   const isZh = language.startsWith("zh") || language === "lzh";
   const userSelectedColorMode = config.appearance.theme.colorMode;
 
+  const [bgImageSrc, setBgImageSrc] = useState("");
+  const isBgDarken =
+    colorMode === "dark" && config.appearance.background.autoDarken;
+
   const [javaInfos, setJavaInfos] = useState<JavaInfo[]>();
   const [newerVersion, setNewerVersion] = useState<VersionMetaInfo>(
     defaultVersionMetaInfo
@@ -65,37 +74,9 @@ export const LauncherConfigContextProvider: React.FC<{
     });
   }, [setConfig, toast]);
 
-  useEffect(() => {
-    handleRetrieveLauncherConfig();
-  }, [handleRetrieveLauncherConfig]);
-
-  useEffect(() => {
-    i18n.changeLanguage(language);
-  }, [language]);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const applyColorMode = () => {
-      let target: "light" | "dark";
-      if (userSelectedColorMode === "system") {
-        target = media.matches ? "dark" : "light";
-      } else {
-        target = userSelectedColorMode;
-      }
-      if (target !== colorMode) toggleColorMode();
-    };
-
-    applyColorMode();
-
-    if (userSelectedColorMode === "system") {
-      media.addEventListener("change", applyColorMode);
-      return () => media.removeEventListener("change", applyColorMode);
-    }
-  }, [userSelectedColorMode, colorMode, toggleColorMode]);
-
   // from frontend to call backend update
   const handleUpdateLauncherConfig = (path: string, value: any) => {
-    // Save to the backend
+    // save to the backend
     ConfigService.updateLauncherConfig(path, value).then((response) => {
       // if success, backend will emit signal, the logic below will be executed
       if (response.status !== "success") {
@@ -118,12 +99,79 @@ export const LauncherConfigContextProvider: React.FC<{
     });
   }, []);
 
+  // retrieve config after partial update listener is set, to avoid missing updates during the initial loading phase. (#1615)
   useEffect(() => {
-    const unlisten = ConfigService.onConfigPartialUpdate(
-      handleConfigPartialUpdate
-    );
-    return () => unlisten();
-  }, [handleConfigPartialUpdate]);
+    let cancelled = false;
+    let unlisten: (() => void) | undefined;
+
+    void ConfigService.onConfigPartialUpdate(handleConfigPartialUpdate)
+      .then((cleanup) => {
+        unlisten = cleanup;
+        if (cancelled) {
+          unlisten();
+          return;
+        }
+
+        handleRetrieveLauncherConfig();
+      })
+      .catch(() => {
+        handleRetrieveLauncherConfig();
+      });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [handleConfigPartialUpdate, handleRetrieveLauncherConfig]);
+
+  useEffect(() => {
+    i18n.changeLanguage(language);
+    document.documentElement.lang =
+      localeResources[language]?.htmlLang || language;
+  }, [language]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const applyColorMode = () => {
+      let target: "light" | "dark";
+      if (userSelectedColorMode === "system") {
+        target = media.matches ? "dark" : "light";
+      } else {
+        target = userSelectedColorMode;
+      }
+      if (target !== colorMode) toggleColorMode();
+    };
+
+    applyColorMode();
+
+    if (userSelectedColorMode === "system") {
+      media.addEventListener("change", applyColorMode);
+      return () => media.removeEventListener("change", applyColorMode);
+    }
+  }, [userSelectedColorMode, colorMode, toggleColorMode]);
+
+  // Resolve the same wallpaper for the layout and liquid glass sampling.
+  useEffect(() => {
+    let cancelled = false;
+    const constructBgImageSrc = async () => {
+      const choice = config.appearance.background.choice;
+      let src: string;
+      if (choice.startsWith("%built-in:")) {
+        const builtInKey = choice.replace("%built-in:", "");
+        src = `/images/backgrounds/${builtInKey}-${colorMode}.jpg`;
+      } else {
+        const directory = await appDataDir();
+        src =
+          convertFileSrc(`${directory}/UserContent/Backgrounds/${choice}`) +
+          `?t=${Date.now()}`;
+      }
+      if (!cancelled) setBgImageSrc(src);
+    };
+    constructBgImageSrc();
+    return () => {
+      cancelled = true;
+    };
+  }, [config.appearance.background.choice, colorMode]);
 
   // java list cache and retriever
   const handleRetrieveJavaList = useCallback(() => {
@@ -169,6 +217,8 @@ export const LauncherConfigContextProvider: React.FC<{
         setConfig,
         update: handleUpdateLauncherConfig,
         isZh,
+        bgImageSrc,
+        isBgDarken,
         newerVersion,
         getJavaInfos,
         handleCheckLauncherUpdate,

@@ -1,18 +1,17 @@
-use crate::error::{SJMCLError, SJMCLResult};
-use crate::launcher_config::models::MemoryInfo;
 use serde_json::json;
+use sjmcl_types::error::{SJMCLError, SJMCLResult};
 use std::net::{SocketAddr, TcpListener};
-use std::path::PathBuf;
-use sysinfo::{Disk, Disks};
-use systemstat::{saturating_sub_bytes, Platform};
+use systemstat::{Platform, saturating_sub_bytes};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_os::locale;
+
+use crate::launcher_config::models::MemoryInfo;
 
 /// Sends app version, OS type and self SHA-256 as statistic data to SJMC asynchronously.
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// send_statistics("1.0.0".to_string(), "windows".to_string(), "sha256".to_string()).await;
 /// ```
 pub async fn send_statistics(version: String, os: String, sha256: String) {
@@ -32,7 +31,7 @@ pub async fn send_statistics(version: String, os: String, sha256: String) {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// let locale = get_mapped_locale();
 /// println!("Locale: {}", locale);
 /// ```
@@ -45,6 +44,7 @@ pub fn get_mapped_locale() -> String {
   #[cfg(target_os = "macos")]
   {
     let language_map = [
+      ("es", vec!["es"]),
       ("fr", vec!["fr"]),
       ("ja", vec!["ja"]),
       ("zh-Hans", vec!["zh-Hans", "wuu-Hans", "yue-Hans"]),
@@ -60,6 +60,7 @@ pub fn get_mapped_locale() -> String {
   #[cfg(not(target_os = "macos"))]
   {
     let language_map = [
+      ("es", vec!["es"]),
       ("fr", vec!["fr"]),
       ("ja", vec!["ja"]),
       ("zh-Hans", vec!["zh-CN", "zh-SG"]),
@@ -79,7 +80,7 @@ pub fn get_mapped_locale() -> String {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// let memory_info = get_memory_info();
 /// ```
 pub fn get_memory_info() -> MemoryInfo {
@@ -118,7 +119,9 @@ pub fn get_memory_info() -> MemoryInfo {
 ///     println!("Drive: {:?}", mount);
 /// }
 /// ```
-pub fn get_all_drive_mount_points() -> Vec<PathBuf> {
+#[cfg(target_os = "windows")]
+pub fn get_all_drive_mount_points() -> Vec<std::path::PathBuf> {
+  use sysinfo::{Disk, Disks};
   let disks = Disks::new_with_refreshed_list(); // creates and loads disks
 
   disks
@@ -135,7 +138,7 @@ pub fn get_all_drive_mount_points() -> Vec<PathBuf> {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// let available_port = find_free_port(None).unwrap();
 /// println!("Found free port: {}", available_port);
 /// ```

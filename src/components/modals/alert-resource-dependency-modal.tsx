@@ -28,8 +28,10 @@ import { ResourceService } from "@/services/resource";
 import { ISOToDate } from "@/utils/datetime";
 import { formatDisplayCount } from "@/utils/string";
 
-interface AlertResourceDependencyModalProps
-  extends Omit<ModalProps, "children"> {
+interface AlertResourceDependencyModalProps extends Omit<
+  ModalProps,
+  "children"
+> {
   dependencies: OtherResourceDependency[];
   downloadSource: OtherResourceSource;
   curInstanceMajorVersion?: string;
@@ -184,7 +186,9 @@ const AlertResourceDependencyModal: React.FC<
         }
         isFullClickZone
         onClick={() => {
-          modalProps.onClose();
+          if (dependencies.length < 2) {
+            modalProps.onClose();
+          }
           openSharedModal("download-specific-resource", {
             resource,
             curInstanceMajorVersion,
@@ -201,6 +205,7 @@ const AlertResourceDependencyModal: React.FC<
     <Modal
       scrollBehavior="inside"
       size={{ base: "md", lg: "lg", xl: "xl" }}
+      returnFocusOnClose={false}
       {...modalProps}
     >
       <ModalOverlay />
@@ -247,7 +252,10 @@ const AlertResourceDependencyModal: React.FC<
             </Button>
             <Button
               colorScheme={primaryColor}
-              onClick={downloadOriginalResource}
+              onClick={() => {
+                modalProps.onClose();
+                downloadOriginalResource();
+              }}
             >
               {t("AlertResourceDependencyModal.button.continue")}
             </Button>

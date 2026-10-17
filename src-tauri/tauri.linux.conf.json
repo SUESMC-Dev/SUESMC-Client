@@ -4,7 +4,7 @@
     "windows": [
       {
         "label": "main",
-        "title": " ",
+        "title": "SJMC Launcher",
         "url": "/",
         "width": 800,
         "height": 550,
@@ -25,6 +25,8 @@
         "minWidth": 640,
         "minHeight": 440,
         "center": true,
+        "transparent": true,
+        "decorations": false,
         "dragDropEnabled": false
       },
       {
@@ -37,6 +39,8 @@
         "minWidth": 640,
         "minHeight": 440,
         "center": true,
+        "transparent": true,
+        "decorations": false,
         "dragDropEnabled": false
       }
     ]

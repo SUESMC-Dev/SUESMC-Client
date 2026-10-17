@@ -33,6 +33,7 @@ import { ISOToDatetime } from "@/utils/datetime";
 
 export const modLoaderTypes: ModLoaderType[] = [
   ModLoaderType.Forge,
+  ModLoaderType.Cleanroom,
   ModLoaderType.Fabric,
   ModLoaderType.NeoForge,
   ModLoaderType.Quilt,
@@ -42,6 +43,7 @@ export const modLoaderTypesToIcon: Record<string, string> = {
   Unknown: "",
   Fabric: "Fabric.png",
   Forge: "Forge.png",
+  Cleanroom: "Cleanroom.png",
   NeoForge: "NeoForge.png",
   Quilt: "Quilt.png",
 };
@@ -107,34 +109,37 @@ export const LoaderSelector: React.FC<LoaderSelectorProps> = ({
     (
       version: ModLoaderResourceInfo | OptiFineResourceInfo
     ): OptionItemProps => {
-      let title = isModLoaderResourceInfo(version)
-        ? version.version
-        : version?.filename;
+      const isModLoader = isModLoaderResourceInfo(version);
+      let title = isModLoader ? version.version : version?.filename;
       return {
         title,
-        description: isModLoaderResourceInfo(version) && version.description,
+        description: isModLoader && version.description,
         prefixElement: (
           <HStack spacing={2.5}>
             <Radio value={title} colorScheme={primaryColor} />
             <Image
-              src={`/images/icons/${isModLoaderResourceInfo(version) ? modLoaderTypesToIcon[version.loaderType] : "OptiFine.png"}`}
+              src={`/images/icons/${isModLoader ? modLoaderTypesToIcon[version.loaderType] : "OptiFine.png"}`}
               alt={title}
               boxSize="28px"
               borderRadius="4px"
             />
           </HStack>
         ),
-        titleExtra: (
-          <Tag colorScheme={primaryColor} className="tag-xs">
-            {t(
-              `LoaderSelector.${(isModLoaderResourceInfo(version) ? version.stable : !version.patch.startsWith("pre")) ? "stable" : "beta"}`
-            )}
-          </Tag>
-        ),
+        titleExtra: (() => {
+          const stableFlag = isModLoader
+            ? version.stable
+            : !version.patch.startsWith("pre");
+          if (stableFlag == null) return;
+          return (
+            <Tag colorScheme={primaryColor} className="tag-xs">
+              {t(`LoaderSelector.${stableFlag ? "stable" : "beta"}`)}
+            </Tag>
+          );
+        })(),
         children: <></>,
         isFullClickZone: true,
         onClick: () => {
-          if (isModLoaderResourceInfo(version)) {
+          if (isModLoader) {
             onSelectModLoader(version);
           } else {
             onSelectOptiFine?.(version);
@@ -196,57 +201,62 @@ export const LoaderSelector: React.FC<LoaderSelectorProps> = ({
       .finally(() => setIsLoading(false));
   }, [selectedGameVersion.id, buildOptionItems, toast]);
 
-  let selectableCardItems = modLoaderTypes.map(
-    (type): SelectableCardProps => ({
-      title: type,
-      iconSrc: `/images/icons/${modLoaderTypesToIcon[type]}`,
-      description:
-        selectedModLoader.loaderType !== ModLoaderType.Unknown
-          ? selectedModLoader.loaderType === type
-            ? selectedModLoader.version || t("LoaderSelector.noVersionSelected")
-            : t("LoaderSelector.notCompatibleWith", {
-                item: selectedModLoader.loaderType,
-              })
-          : t("LoaderSelector.noVersionSelected"),
-      displayMode: "selector",
-      isLoading,
-      isSelected: type === selectedModLoader.loaderType,
-      isChevronShown: selectedType !== type,
-      onSelect: () => {
-        setSelectedType(type);
-        if (selectedModLoader.loaderType !== type) {
-          onSelectModLoader({
-            loaderType: type,
-            version: "",
-            description: "",
-            stable: false,
-          });
-          setSelectedId("");
-        } else {
-          setSelectedId(selectedModLoader.version);
-        }
-        if (
-          type !== ModLoaderType.Forge ||
-          (selectedOptiFine && !selectedOptiFine.filename)
-        ) {
-          // When OptiFine is not compatible with the selected mod loader, or selected without a version, clear it
-          onSelectOptiFine?.(undefined);
-        }
-      },
-      onCancel: () => {
-        if (selectedType === type) {
-          if (!!selectedOptiFine) {
-            setSelectedType("OptiFine");
-            setSelectedId(selectedOptiFine!.filename);
-          } else {
-            setSelectedType(ModLoaderType.Unknown);
+  let selectableCardItems = modLoaderTypes
+    .filter(
+      (it) =>
+        it != ModLoaderType.Cleanroom || selectedGameVersion.id === "1.12.2"
+    )
+    .map(
+      (type): SelectableCardProps => ({
+        title: type,
+        iconSrc: `/images/icons/${modLoaderTypesToIcon[type]}`,
+        description:
+          selectedModLoader.loaderType !== ModLoaderType.Unknown
+            ? selectedModLoader.loaderType === type
+              ? selectedModLoader.version ||
+                t("LoaderSelector.noVersionSelected")
+              : t("LoaderSelector.notCompatibleWith", {
+                  item: selectedModLoader.loaderType,
+                })
+            : t("LoaderSelector.noVersionSelected"),
+        displayMode: "selector",
+        isLoading,
+        isSelected: type === selectedModLoader.loaderType,
+        isChevronShown: selectedType !== type,
+        onSelect: () => {
+          setSelectedType(type);
+          if (selectedModLoader.loaderType !== type) {
+            onSelectModLoader({
+              loaderType: type,
+              version: "",
+              description: "",
+            });
             setSelectedId("");
+          } else {
+            setSelectedId(selectedModLoader.version);
           }
-        }
-        onSelectModLoader(defaultModLoaderResourceInfo);
-      },
-    })
-  );
+          if (
+            type !== ModLoaderType.Forge ||
+            (selectedOptiFine && !selectedOptiFine.filename)
+          ) {
+            // When OptiFine is not compatible with the selected mod loader, or selected without a version, clear it
+            onSelectOptiFine?.(undefined);
+          }
+        },
+        onCancel: () => {
+          if (selectedType === type) {
+            if (!!selectedOptiFine) {
+              setSelectedType("OptiFine");
+              setSelectedId(selectedOptiFine!.filename);
+            } else {
+              setSelectedType(ModLoaderType.Unknown);
+              setSelectedId("");
+            }
+          }
+          onSelectModLoader(defaultModLoaderResourceInfo);
+        },
+      })
+    );
 
   if (typeof onSelectOptiFine === "function") {
     selectableCardItems.push({

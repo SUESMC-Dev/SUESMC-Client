@@ -40,7 +40,7 @@ const InstanceShaderPacksPage = () => {
     instanceId,
     summary,
     openInstanceSubdir,
-    handleImportResource,
+    handleImportResources,
     getShaderPackList,
     isShaderPackListLoading: isLoading,
   } = useInstanceSharedData();
@@ -74,15 +74,17 @@ const InstanceShaderPacksPage = () => {
 
   useFileDnD({
     extensions: ["zip"],
+    multiple: true,
     titleKey: "InstanceShaderPacksPage.fileDnD.title",
     descKey: "InstanceShaderPacksPage.fileDnD.desc",
     icon: LuHaze,
-    onDrop: async (path) => {
-      handleImportResource({
+    onDrop: async (paths) => {
+      handleImportResources({
         filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
         filterExt: ["zip"],
         tgtDirType: InstanceSubdirType.ShaderPacks,
-        path,
+        paths,
+        multiple: true,
         onSuccessCallback: () => getShaderPackListWrapper(true),
       });
     },
@@ -117,10 +119,11 @@ const InstanceShaderPacksPage = () => {
     {
       icon: "add",
       onClick: () => {
-        handleImportResource({
+        handleImportResources({
           filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
           filterExt: ["zip"],
           tgtDirType: InstanceSubdirType.ShaderPacks,
+          multiple: true,
           onSuccessCallback: () => getShaderPackListWrapper(true),
         });
       },
@@ -222,7 +225,7 @@ const InstanceShaderPacksPage = () => {
       <Section
         title={t("InstanceShaderPacksPage.shaderPackList.title")}
         isAccordion
-        initialIsOpen={accordionStates[0]}
+        initialIsOpen={accordionStates[1]}
         onAccordionToggle={(isOpen) => {
           update(
             "states.instanceShaderPacksPage.accordionStates",

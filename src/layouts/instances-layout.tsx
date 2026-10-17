@@ -1,5 +1,8 @@
 import {
   Box,
+  Center,
+  CircularProgress,
+  CircularProgressLabel,
   Grid,
   GridItem,
   HStack,
@@ -10,7 +13,7 @@ import {
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { FaStar } from "react-icons/fa6";
+import { FaPause, FaPlay, FaStar } from "react-icons/fa6";
 import { GoDotFill } from "react-icons/go";
 import {
   LuBox,
@@ -20,10 +23,11 @@ import {
   LuSettings,
 } from "react-icons/lu";
 import NavMenu from "@/components/common/nav-menu";
-import SelectableButton from "@/components/common/selectable-button";
 import { useLauncherConfig } from "@/contexts/config";
 import { useGlobalData } from "@/contexts/global-data";
+import { parseTaskGroup, useTaskContext } from "@/contexts/task";
 import { ChakraColorEnums } from "@/enums/misc";
+import { GTaskEventStatusEnums, TaskGroupDesc } from "@/models/task";
 import { getGameDirName } from "@/utils/instance";
 
 interface InstancesLayoutProps {
@@ -42,19 +46,49 @@ const InstancesLayout: React.FC<InstancesLayoutProps> = ({ children }) => {
   const navBarType = config.general.functionality.instancesNavType;
   const showNavBar = navBarType !== "hidden";
 
+  const { tasks } = useTaskContext();
+
+  const installTasks = useMemo(() => {
+    return tasks.filter((t) => {
+      if (t.status === GTaskEventStatusEnums.Cancelled) return false;
+      const parsed = parseTaskGroup(t.taskGroup);
+      return (
+        parsed.name === "game-client" || parsed.name === "game-client-w-java"
+      );
+    });
+  }, [tasks]);
+
   const instanceItems: {
     value: string;
     icon: React.ReactNode;
     label: string;
-    tooltip?: string;
+    rightElement?: React.ReactNode;
   }[] = useMemo(
     () => [
       {
         value: "/instances/list",
         icon: <Icon as={LuBoxes} />,
         label: t("AllInstancesPage.title"),
-        tooltip: "",
       },
+      ...(navBarType === "instance"
+        ? installTasks
+            .filter(
+              (t) =>
+                t.status === GTaskEventStatusEnums.Started ||
+                t.status === GTaskEventStatusEnums.Stopped
+            )
+            .map((t) => {
+              const parsed = parseTaskGroup(t.taskGroup);
+              const name =
+                parsed.params.param || parsed.params.param1 || t.taskGroup;
+              return {
+                value: "/downloads",
+                icon: <Icon as={LuBox} />,
+                label: name,
+                rightElement: <InstanceDownloadIndicator task={t} />,
+              };
+            })
+        : []),
       ...(navBarType === "instance"
         ? instanceList.map((item) => ({
             // group by instance
@@ -75,8 +109,21 @@ const InstancesLayout: React.FC<InstancesLayoutProps> = ({ children }) => {
               label: getGameDirName(item),
             }))),
     ],
-    [config.localGameDirectories, instanceList, navBarType, t]
+    [config.localGameDirectories, instanceList, installTasks, navBarType, t]
   );
+
+  const bottomNavMenuItems = [
+    {
+      icon: LuCirclePlus,
+      label: t("AllInstancesPage.button.addAndImport"),
+      value: "/instances/add-import",
+    },
+    {
+      icon: LuSettings,
+      label: t("SettingsLayout.settingsDomainList.global-game"),
+      value: "/settings/global-game",
+    },
+  ];
 
   // Truncate to the ID, excluding subpage routes
   const isInstanceDetailsPage = (path: string) =>
@@ -127,52 +174,78 @@ const InstancesLayout: React.FC<InstancesLayoutProps> = ({ children }) => {
                 }}
                 items={instanceItems.map((item) => ({
                   label: (
-                    <HStack spacing={2} overflow="hidden">
+                    <HStack spacing={2} overflow="hidden" w="100%">
                       {item.icon}
-                      <Text fontSize="sm" className="ellipsis-text">
+                      <Text fontSize="sm" className="ellipsis-text" flex="1">
                         {item.label}
                       </Text>
+                      {item.rightElement && (
+                        <Box flexShrink={0}>{item.rightElement}</Box>
+                      )}
                     </HStack>
                   ),
                   value: item.value,
-                  tooltip: item.tooltip ?? item.label,
+                  tooltip: item.label,
                 }))}
               />
             </Box>
-            <VStack mt="auto" align="stretch" spacing={0.5}>
-              <SelectableButton
-                size="sm"
-                onClick={() => {
-                  router.push("/instances/add-import");
-                }}
-                isSelected={router.asPath === "/instances/add-import"}
-              >
-                <HStack spacing={2} overflow="hidden">
-                  <Icon as={LuCirclePlus} />
-                  <Text fontSize="sm" className="ellipsis-text">
-                    {t("AllInstancesPage.button.addAndImport")}
-                  </Text>
-                </HStack>
-              </SelectableButton>
-              <SelectableButton
-                size="sm"
-                onClick={() => {
-                  router.push("/settings/global-game");
-                }}
-              >
-                <HStack spacing={2} overflow="hidden">
-                  <Icon as={LuSettings} />
-                  <Text fontSize="sm" className="ellipsis-text">
-                    {t("SettingsLayout.settingsDomainList.global-game")}
-                  </Text>
-                </HStack>
-              </SelectableButton>
-            </VStack>
+            <NavMenu
+              mt="auto"
+              items={bottomNavMenuItems.map((item) => ({
+                label: (
+                  <HStack spacing={2} overflow="hidden">
+                    <Icon as={item.icon} />
+                    <Text fontSize="sm" className="ellipsis-text">
+                      {item.label}
+                    </Text>
+                  </HStack>
+                ),
+                value: item.value,
+                tooltip: item.label,
+              }))}
+              selectedKeys={[router.asPath]}
+              onClick={(value) => router.push(value)}
+            />
           </VStack>
         </GridItem>
       )}
       <GridItem className="content-full-y">{children}</GridItem>
     </Grid>
+  );
+};
+
+const InstanceDownloadIndicator: React.FC<{ task: TaskGroupDesc }> = ({
+  task,
+}) => {
+  const { handleStopProgressiveTaskGroup, handleResumeProgressiveTaskGroup } =
+    useTaskContext();
+  const isStarted = task.status === GTaskEventStatusEnums.Started;
+
+  return (
+    <Box
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isStarted) handleStopProgressiveTaskGroup(task.taskGroup);
+        else handleResumeProgressiveTaskGroup(task.taskGroup);
+      }}
+      cursor="pointer"
+      borderRadius="full"
+      display="flex"
+      alignItems="center"
+    >
+      <CircularProgress
+        size="20px"
+        value={task.progress ?? 0}
+        thickness={8}
+        trackColor="transparent"
+      >
+        <CircularProgressLabel>
+          <Center w="100%" h="100%">
+            <Icon as={isStarted ? FaPause : FaPlay} boxSize={2.5} />
+          </Center>
+        </CircularProgressLabel>
+      </CircularProgress>
+    </Box>
   );
 };
 

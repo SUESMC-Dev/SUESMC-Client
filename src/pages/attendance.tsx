@@ -77,19 +77,6 @@ const AttendancePage = () => {
     setPlayerList(getPlayerList() || []);
   }, [getPlayerList]);
 
-  const refreshData = () => {
-    setLoading(true);
-    if (
-      selectedPlayer &&
-      selectedPlayer.playerType === PlayerType.ThirdParty &&
-      !selectedPlayer.authServer?.features?.clubAttendanceUrl
-    ) {
-      handleRefreshPlayer();
-      return;
-    }
-    fetchData();
-  };
-
   const handleRefreshPlayer = useCallback(() => {
     if (!selectedPlayer) {
       return;
@@ -153,6 +140,19 @@ const AttendancePage = () => {
       setLoading(false);
     }
   }, [selectedPlayer, i18n.language, t, handleRefreshPlayer]);
+
+  const refreshData = () => {
+    setLoading(true);
+    if (
+      selectedPlayer &&
+      selectedPlayer.playerType === PlayerType.ThirdParty &&
+      !selectedPlayer.authServer?.features?.clubAttendanceUrl
+    ) {
+      handleRefreshPlayer();
+      return;
+    }
+    fetchData();
+  };
 
   useEffect(() => {
     fetchData();

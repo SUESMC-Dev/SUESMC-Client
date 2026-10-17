@@ -6,17 +6,20 @@ type LocaleResources = {
   [key: string]: {
     translation: Record<string, any>;
     display_name: string;
+    htmlLang: string;
   };
 };
 
 export const localeResources: LocaleResources = {
-  "zh-Hans": {
-    translation: zh_Hans,
-    display_name: "简体中文",
-  },
   en: {
     translation: en,
     display_name: "English",
+    htmlLang: "en",
+  },
+  "zh-Hans": {
+    translation: zh_Hans,
+    display_name: "简体中文",
+    htmlLang: "zh-Hans",
   },
 };
 
