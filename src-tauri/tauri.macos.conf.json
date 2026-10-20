@@ -1,5 +1,5 @@
 {
-  "identifier": "SUESMC-Client",
+  "identifier": "ltd.suesmc.client",
   "bundle": {
     "resources": {
       "infoplist": ""
@@ -18,7 +18,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "SJMC Launcher",
+        "title": "SUESMC Client",
         "url": "/",
         "width": 800,
         "height": 550,

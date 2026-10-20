@@ -1,5 +1,5 @@
 {
-  "identifier": "SUESMC-Client",
+  "identifier": "ltd.suesmc.client",
   "bundle": {
     "windows": {
       "nsis": {
@@ -7,8 +7,7 @@
         "languages": [
           "English",
           "SimpChinese"
-        ],
-        "sidebarImage": "assets/misc/nsis_sidebar.bmp"
+        ]
       }
     }
   },
@@ -17,7 +16,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "SJMC Launcher",
+        "title": "SUESMC Client",
         "url": "/",
         "width": 820,
         "height": 550,
