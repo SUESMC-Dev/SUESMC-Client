@@ -4,7 +4,7 @@ version.workspace = true
 description = "A Minecraft launcher from SJMC, modified by SUESMC-Dev"
 authors = ["SJMCL Team", "SUESMC-dev"]
 license = "GNU General Public License v3.0 (with additional terms)"
-repository = "https://github.com/UNIkeEN/SJMCL"
+repository = "https://github.com/SUESMC-Dev/SUESMC-Client"
 edition.workspace = true
 rust-version.workspace = true
 
@@ -17,7 +17,7 @@ members = [
 resolver = "3"
 
 [workspace.package]
-version = "1.4.0"
+version = "1.4.0-SUESMC-1"
 edition = "2024"
 rust-version = "1.98.1"
 
