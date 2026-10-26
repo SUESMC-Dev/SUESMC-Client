@@ -40,6 +40,10 @@ cargoToml = cargoToml.replace(
   `authors = ["SJMCL Team"]`,
   `authors = ["SJMCL Team", "SUESMC-dev"]`
 );
+cargoToml = cargoToml.replace(
+  `repository = "https://github.com/UNIkeEN/SJMCL"`,
+  `repository = "https://github.com/SUESMC-Dev/SUESMC-Client"`
+);
 fs.writeFileSync(cargoTomlPath, cargoToml);
 
 console.log(`✅ Updated all version numbers to ${newVersion}`);
