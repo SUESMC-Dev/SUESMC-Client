@@ -69,4 +69,4 @@ package-lock.json
 .gemini/
 .cursor/
 
-extensions/
+/.prototools

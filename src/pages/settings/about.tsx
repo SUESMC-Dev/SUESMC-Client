@@ -40,7 +40,7 @@ const AboutSettingsPage = () => {
     bmclapi: "https://bmclapidoc.bangbang93.com/",
     hmcl: "https://hmcl.huangyuhui.net/",
     littleskin: "https://github.com/LittleSkinChina",
-    scl: "https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web/",
+    scl: "https://swift-craft-launcher-web.pages.dev",
   };
 
   const checkUpdate = useCallback(async () => {
