@@ -12,6 +12,8 @@ import styles from "@/styles/launch.module.css";
 
 // keep the card up to date while the launcher stays open
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
+// focus / visibility changes are frequent, do not request again within this gap
+const MIN_REFRESH_INTERVAL = 60 * 1000;
 
 export const AttendanceCard = () => {
   const { t, i18n } = useTranslation();
@@ -25,6 +27,8 @@ export const AttendanceCard = () => {
   const sessionRefreshTriedRef = useRef(false);
   // whether a request is in flight, used to skip duplicated refreshes
   const fetchingRef = useRef(false);
+  // timestamp of the last request, used to throttle focus refreshes
+  const lastFetchAtRef = useRef(0);
 
   // read the latest global data helpers without making them effect dependencies,
   // otherwise renewing the player list would retrigger the fetching endlessly
@@ -45,9 +49,16 @@ export const AttendanceCard = () => {
         return;
       }
       setVisible(true);
-      if (!force && fetchingRef.current) {
+      if (fetchingRef.current) {
         return;
       }
+      const now = Date.now();
+      // a freshly displayed card is cheap to reuse, only a new round or the
+      // periodic refresh is allowed to bypass the throttle
+      if (!force && now - lastFetchAtRef.current < MIN_REFRESH_INTERVAL) {
+        return;
+      }
+      lastFetchAtRef.current = now;
       fetchingRef.current = true;
       setLoading(true);
       try {
