@@ -367,6 +367,7 @@
       "noSelectedPlayer": "No player selected",
       "notAvailable": "Attendance feature not available for this server.",
       "fetchFailed": "Failed to fetch data: {{message}}",
+      "networkFailed": "Failed to fetch attendance data: {{message}}. Your session may have expired, please try re-login",
       "unknown": "An error occurred while fetching data.",
       "expired": "Session expired. Please re-login to continue."
     },
@@ -2416,6 +2417,17 @@
             "FULL_LOGIN_UNAVAILABLE": "Please log in with your Microsoft account before accessing this feature.",
             "INVALID": "UUID is invalid",
             "TEXTURE_ERROR": "Unable to get player texture"
+          }
+        }
+      },
+      "fetchAttendanceData": {
+        "error": {
+          "title": "Failed to fetch attendance data",
+          "description": {
+            "EXPIRED": "Your session has expired, please re-login",
+            "NETWORK_ERROR": "Unable to connect to the attendance server, please check your network connection",
+            "PARSE_ERROR": "The server returned data in an incorrect format",
+            "NOT_FOUND": "Attendance is not available for this player"
           }
         }
       },

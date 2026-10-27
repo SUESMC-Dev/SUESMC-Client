@@ -326,19 +326,19 @@ export class AccountService {
   /**
    * FETCH attendance data from the club attendance URL.
    * @param {string} attendanceUrl - The URL to fetch attendance data from.
-   * @param {string} accessToken - The access token for authentication.
+   * @param {string} playerId - The ID of the player whose access token will be used.
    * @param {string} locale - The locale to use for the request.
    * @returns {Promise<InvokeResponse<any>>}
    */
   @responseHandler("account")
   static async fetchAttendanceData(
     attendanceUrl: string,
-    accessToken: string,
+    playerId: string,
     locale: string
   ): Promise<InvokeResponse<any>> {
     return await invoke("fetch_attendance_data", {
       attendanceUrl,
-      accessToken,
+      playerId,
       locale,
     });
   }

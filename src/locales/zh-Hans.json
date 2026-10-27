@@ -367,6 +367,7 @@
       "noSelectedPlayer": "尚未选择角色",
       "notAvailable": "请选择支持考勤的角色",
       "fetchFailed": "获取数据失败: {{message}}",
+      "networkFailed": "获取考勤数据失败: {{message}}。也可能是登录状态已过期，请尝试重新登录",
       "unknown": "获取数据时发生错误",
       "expired": "会话已过期，请重新登录"
     },
@@ -2416,6 +2417,17 @@
             "FULL_LOGIN_UNAVAILABLE": "请先登录微软账户后使用此功能。",
             "INVALID": "UUID 无效",
             "TEXTURE_ERROR": "角色皮肤获取失败"
+          }
+        }
+      },
+      "fetchAttendanceData": {
+        "error": {
+          "title": "获取考勤数据失败",
+          "description": {
+            "EXPIRED": "登录状态已过期，请重新登录",
+            "NETWORK_ERROR": "无法连接至考勤服务器，请检查网络连接",
+            "PARSE_ERROR": "服务器返回数据格式错误",
+            "NOT_FOUND": "当前角色不支持考勤功能"
           }
         }
       },

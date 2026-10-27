@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { LuArrowRight } from "react-icons/lu";
@@ -71,8 +71,11 @@ const AttendancePage = () => {
   const [data, setData] = useState<AttendanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isExpired, setIsExpired] = useState(false);
+  const [needRelogin, setNeedRelogin] = useState(false);
   const [playerList, setPlayerList] = useState<Player[]>([]);
+  // whether the login session has been renewed for the current fetching round,
+  // to avoid refreshing repeatedly when the request keeps failing
+  const sessionRefreshTriedRef = useRef(false);
   useEffect(() => {
     setPlayerList(getPlayerList() || []);
   }, [getPlayerList]);
@@ -86,7 +89,7 @@ const AttendancePage = () => {
       if (response.status === "success") {
         getPlayerList(true);
       } else if (response.raw_error === AccountServiceError.Expired) {
-        setIsExpired(true);
+        setNeedRelogin(true);
         setError(t("AttendancePage.error.expired"));
         setLoading(false);
       } else {
@@ -99,7 +102,7 @@ const AttendancePage = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setIsExpired(false);
+    setNeedRelogin(false);
     if (
       !selectedPlayer ||
       selectedPlayer.playerType !== PlayerType.ThirdParty ||
@@ -110,39 +113,72 @@ const AttendancePage = () => {
       setLoading(false);
       return;
     }
+    const attendanceUrl = selectedPlayer.authServer.features.clubAttendanceUrl;
+    const playerId = selectedPlayer.id;
     try {
-      const response = await AccountService.fetchAttendanceData(
-        selectedPlayer.authServer.features.clubAttendanceUrl,
-        selectedPlayer.accessToken || "",
+      let response = await AccountService.fetchAttendanceData(
+        attendanceUrl,
+        playerId,
         i18n.language
       );
+
+      // The access token may have expired, renew the session and retry. The
+      // request itself always uses the token stored in the backend, so the retry
+      // picks up the renewed token automatically.
+      if (
+        response.status === "error" &&
+        response.raw_error === AccountServiceError.Expired &&
+        !sessionRefreshTriedRef.current
+      ) {
+        sessionRefreshTriedRef.current = true;
+        const refreshResponse = await AccountService.refreshPlayer(playerId);
+        if (refreshResponse.status === "success") {
+          getPlayerList(true);
+          response = await AccountService.fetchAttendanceData(
+            attendanceUrl,
+            playerId,
+            i18n.language
+          );
+        }
+      }
+
       if (response.status === "success") {
         const json: AttendanceData = response.data;
         setData(json);
         setLoading(false);
-      } else {
-        if (
-          response.raw_error === "EXPIRED" ||
-          response.details === "EXPIRED"
-        ) {
-          handleRefreshPlayer();
-        } else {
-          setError(
-            t("AttendancePage.error.fetchFailed", {
-              message: response.message,
-            })
-          );
-        }
+        return;
       }
+
+      if (response.raw_error === AccountServiceError.Expired) {
+        setNeedRelogin(true);
+        setError(t("AttendancePage.error.expired"));
+      } else if (response.raw_error === AccountServiceError.NetworkError) {
+        // an invalid access token is often reported as a network error as well,
+        // so keep the re-login entry available besides the network hint
+        setNeedRelogin(true);
+        setError(
+          t("AttendancePage.error.networkFailed", {
+            message: response.details || response.message,
+          })
+        );
+      } else {
+        setError(
+          t("AttendancePage.error.fetchFailed", {
+            message: response.details || response.message,
+          })
+        );
+      }
+      setLoading(false);
     } catch (err) {
       setError(t("AttendancePage.error.unknown"));
       console.error(err);
       setLoading(false);
     }
-  }, [selectedPlayer, i18n.language, t, handleRefreshPlayer]);
+  }, [selectedPlayer, i18n.language, t, getPlayerList]);
 
   const refreshData = () => {
     setLoading(true);
+    sessionRefreshTriedRef.current = false;
     if (
       selectedPlayer &&
       selectedPlayer.playerType === PlayerType.ThirdParty &&
@@ -270,14 +306,17 @@ const AttendancePage = () => {
       </Alert>
     ),
     time?.status && <StatusBanner status={time.status} />,
-    isExpired && {
+    needRelogin && {
       title: t("AttendancePage.button.relogin"),
       children: <Icon as={LuArrowRight} boxSize={3.5} mr="5px" />,
       isFullClickZone: true,
       onClick: () =>
         openSharedModal("relogin", {
           player: selectedPlayer,
-          onSuccess: () => getPlayerList(true),
+          onSuccess: () => {
+            sessionRefreshTriedRef.current = false;
+            getPlayerList(true);
+          },
         }),
     },
     time && {
@@ -320,7 +359,6 @@ const AttendancePage = () => {
                   onClick={refreshData}
                   isLoading={loading}
                   disabled={
-                    isExpired ||
                     !selectedPlayer ||
                     selectedPlayer.playerType !== PlayerType.ThirdParty
                   }

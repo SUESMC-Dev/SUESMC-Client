@@ -669,10 +669,17 @@ pub async fn import_external_account_info(
 pub async fn fetch_attendance_data(
   app: AppHandle,
   attendance_url: String,
-  access_token: String,
+  player_id: String,
   locale: String,
 ) -> SJMCLResult<serde_json::Value> {
   let client = app.state::<reqwest::Client>();
+
+  // always resolve the access token on the backend side, so that a refreshed
+  // token is used even if the caller still holds the outdated one
+  let access_token = misc::get_player_by_id(&app, &player_id)?
+    .ok_or(AccountError::NotFound)?
+    .access_token
+    .unwrap_or_default();
 
   let accept_language = if locale.starts_with("zh") {
     "zh_CN"
@@ -690,13 +697,17 @@ pub async fn fetch_attendance_data(
     .await
     .map_err(|_| AccountError::NetworkError)?;
 
-  if response.status().is_success() {
+  let status = response.status();
+
+  if status.is_success() {
     let json: serde_json::Value = response
       .json()
       .await
       .map_err(|_| AccountError::ParseError)?;
     Ok(json)
-  } else if response.status() == reqwest::StatusCode::FORBIDDEN {
+  } else if status == reqwest::StatusCode::UNAUTHORIZED || status == reqwest::StatusCode::FORBIDDEN
+  {
+    // treat auth failures as expired sessions rather than network errors
     Err(AccountError::Expired.into())
   } else {
     Err(AccountError::NetworkError.into())
